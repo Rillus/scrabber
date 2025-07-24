@@ -44,6 +44,7 @@ This document outlines the requirements for a web-based application designed to 
 ### 5.2 Word and Score Input
 - [x] Word Input Field: A text input for the word played.
 - [x] Letter Value Mapping: The system must contain a mapping of standard Scrabble letter values (A=1, B=3, C=3, D=2, E=1, F=4, G=2, H=4, I=1, J=8, K=5, L=1, M=3, N=1, O=1, P=3, Q=10, R=1, S=1, T=1, U=1, V=4, W=4, X=8, Y=4, Z=10).
+- [x] Visual Tile Representation: Each letter should be displayed as a tile with the letter prominently shown and its point value displayed in the bottom right corner, matching standard Scrabble tile design.
 
 #### Bonus Square Selection:
 - [x] For each letter in the entered word, the user should be able to toggle/select if it's on a DLS or TLS square. This could be implemented with a visual representation of the word where each letter can be clicked to cycle through states (normal, DLS, TLS).

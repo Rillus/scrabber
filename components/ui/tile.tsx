@@ -42,7 +42,6 @@ function Tile({
   isBlank = false, 
   onClick, 
   className = "",
-  variant,
   size,
   ...props 
 }: TileProps) {

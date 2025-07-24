@@ -72,23 +72,20 @@ export default function ScrabbleScoreKeeper() {
   const [turnHistory, setTurnHistory] = useState<Turn[]>([])
   const [tempPlayerNames, setTempPlayerNames] = useState<string[]>(["Player 1", "Player 2"])
 
-  // Initialize player names array when player count changes
+  // Update tempPlayerNames when playerCount changes
   useEffect(() => {
-    const newNames = Array.from({ length: playerCount }, (_, i) => tempPlayerNames[i] || `Player ${i + 1}`)
+    const newNames = Array.from({ length: playerCount }, (_, i) => `Player ${i + 1}`)
     setTempPlayerNames(newNames)
   }, [playerCount])
 
-  // Update letter states when word changes
+  // Update letterStates when word changes
   useEffect(() => {
-    const newLetterStates = word
-      .toUpperCase()
-      .split("")
-      .map((letter, index) => ({
-        letter,
-        bonus: (letterStates[index]?.bonus || "normal") as BonusType,
-        isBlank: letterStates[index]?.isBlank || false,
-      }))
-    setLetterStates(newLetterStates)
+    const newStates = word.split('').map((letter) => ({
+      letter: letter.toUpperCase(),
+      bonus: 'normal' as BonusType,
+      isBlank: false,
+    }))
+    setLetterStates(newStates)
   }, [word])
 
   const startGame = () => {
@@ -126,11 +123,7 @@ export default function ScrabbleScoreKeeper() {
     setLetterStates(newStates)
   }
 
-  const toggleBlankTile = (index: number) => {
-    const newStates = [...letterStates]
-    newStates[index].isBlank = !newStates[index].isBlank
-    setLetterStates(newStates)
-  }
+
 
   const calculateScore = () => {
     if (!word) return 0
@@ -139,7 +132,7 @@ export default function ScrabbleScoreKeeper() {
 
     // Calculate letter scores with bonuses
     letterStates.forEach(({ letter, bonus, isBlank }) => {
-      let value = isBlank ? 0 : LETTER_VALUES[letter] || 0
+      let value = isBlank ? 0 : LETTER_VALUES[letter.toUpperCase()] || 0
 
       if (bonus === "dls") value *= 2
       if (bonus === "tls") value *= 3
@@ -173,27 +166,7 @@ export default function ScrabbleScoreKeeper() {
     return bonuses
   }
 
-  const getBonusColor = (bonus: BonusType) => {
-    switch (bonus) {
-      case "dls":
-        return "bg-sky-200 border-sky-400 text-sky-900" // Light blue for Double Letter Score
-      case "tls":
-        return "bg-blue-600 border-blue-700 text-white" // Dark blue for Triple Letter Score
-      default:
-        return "bg-green-100 border-green-300 text-green-800" // Default green like the board
-    }
-  }
 
-  const getBonusLabel = (bonus: BonusType) => {
-    switch (bonus) {
-      case "dls":
-        return "DLS"
-      case "tls":
-        return "TLS"
-      default:
-        return ""
-    }
-  }
 
   const confirmTurn = () => {
     if (!word.trim()) return
@@ -475,7 +448,7 @@ export default function ScrabbleScoreKeeper() {
                                 <Tile
                                   key={letterIndex}
                                   letter={letter}
-                                  points={LETTER_VALUES[letter] || 0}
+                                  points={LETTER_VALUES[letter.toUpperCase()] || 0}
                                   bonus={bonus}
                                   isBlank={isBlank}
                                   className="scale-75"

@@ -216,4 +216,28 @@ describe('Tile Component', () => {
       expect(tileElement).toBeInTheDocument()
     })
   })
+
+  describe('Letter Values', () => {
+    it('displays correct letter values', () => {
+      render(<Tile letter="A" points={1} />)
+      
+      const pointValue = screen.getByText('1')
+      expect(pointValue).toBeInTheDocument()
+      expect(pointValue).toHaveClass('absolute', 'bottom-0.5', 'right-0.5')
+    })
+
+    it('displays high-value letters correctly', () => {
+      render(<Tile letter="Q" points={10} />)
+      
+      const pointValue = screen.getByText('10')
+      expect(pointValue).toBeInTheDocument()
+    })
+
+    it('shows zero for blank tiles', () => {
+      render(<Tile letter="A" points={1} isBlank={true} />)
+      
+      const pointValue = screen.getByText('0')
+      expect(pointValue).toBeInTheDocument()
+    })
+  })
 }) 
