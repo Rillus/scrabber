@@ -1,103 +1,514 @@
-import Image from "next/image";
+"use client"
 
-export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+import { useState, useEffect } from "react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Tile, type BonusType } from "@/components/ui/tile"
+import { Users, Trophy, RotateCcw, Plus } from "lucide-react"
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+// Scrabble letter values
+const LETTER_VALUES: Record<string, number> = {
+  A: 1,
+  B: 3,
+  C: 3,
+  D: 2,
+  E: 1,
+  F: 4,
+  G: 2,
+  H: 4,
+  I: 1,
+  J: 8,
+  K: 5,
+  L: 1,
+  M: 3,
+  N: 1,
+  O: 1,
+  P: 3,
+  Q: 10,
+  R: 1,
+  S: 1,
+  T: 1,
+  U: 1,
+  V: 4,
+  W: 4,
+  X: 8,
+  Y: 4,
+  Z: 10,
+}
+
+
+
+interface LetterState {
+  letter: string
+  bonus: BonusType
+  isBlank: boolean
+}
+
+interface Turn {
+  player: string
+  word: string
+  score: number
+  bonuses: string[]
+}
+
+interface Player {
+  name: string
+  score: number
+}
+
+export default function ScrabbleScoreKeeper() {
+  const [gameStarted, setGameStarted] = useState(false)
+  const [playerCount, setPlayerCount] = useState(2)
+  const [players, setPlayers] = useState<Player[]>([])
+  const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0)
+  const [word, setWord] = useState("")
+  const [letterStates, setLetterStates] = useState<LetterState[]>([])
+  const [hasDoubleWord, setHasDoubleWord] = useState(false)
+  const [hasTripleWord, setHasTripleWord] = useState(false)
+  const [hasBingo, setHasBingo] = useState(false)
+  const [turnHistory, setTurnHistory] = useState<Turn[]>([])
+  const [tempPlayerNames, setTempPlayerNames] = useState<string[]>(["Player 1", "Player 2"])
+
+  // Initialize player names array when player count changes
+  useEffect(() => {
+    const newNames = Array.from({ length: playerCount }, (_, i) => tempPlayerNames[i] || `Player ${i + 1}`)
+    setTempPlayerNames(newNames)
+  }, [playerCount])
+
+  // Update letter states when word changes
+  useEffect(() => {
+    const newLetterStates = word
+      .toUpperCase()
+      .split("")
+      .map((letter, index) => ({
+        letter,
+        bonus: (letterStates[index]?.bonus || "normal") as BonusType,
+        isBlank: letterStates[index]?.isBlank || false,
+      }))
+    setLetterStates(newLetterStates)
+  }, [word])
+
+  const startGame = () => {
+    const newPlayers = tempPlayerNames.map((name) => ({ name, score: 0 }))
+    setPlayers(newPlayers)
+    setGameStarted(true)
+    setCurrentPlayerIndex(0)
+    setTurnHistory([])
+  }
+
+  const newGame = () => {
+    setGameStarted(false)
+    setPlayers([])
+    setCurrentPlayerIndex(0)
+    setWord("")
+    setLetterStates([])
+    setHasDoubleWord(false)
+    setHasTripleWord(false)
+    setHasBingo(false)
+    setTurnHistory([])
+  }
+
+  const toggleLetterBonus = (index: number) => {
+    const newStates = [...letterStates]
+    const currentBonus = newStates[index].bonus
+
+    if (currentBonus === "normal") {
+      newStates[index].bonus = "dls"
+    } else if (currentBonus === "dls") {
+      newStates[index].bonus = "tls"
+    } else {
+      newStates[index].bonus = "normal"
+    }
+
+    setLetterStates(newStates)
+  }
+
+  const toggleBlankTile = (index: number) => {
+    const newStates = [...letterStates]
+    newStates[index].isBlank = !newStates[index].isBlank
+    setLetterStates(newStates)
+  }
+
+  const calculateScore = () => {
+    if (!word) return 0
+
+    let letterScore = 0
+
+    // Calculate letter scores with bonuses
+    letterStates.forEach(({ letter, bonus, isBlank }) => {
+      let value = isBlank ? 0 : LETTER_VALUES[letter] || 0
+
+      if (bonus === "dls") value *= 2
+      if (bonus === "tls") value *= 3
+
+      letterScore += value
+    })
+
+    // Apply word multipliers
+    if (hasDoubleWord) letterScore *= 2
+    if (hasTripleWord) letterScore *= 3
+
+    // Add bingo bonus
+    if (hasBingo) letterScore += 50
+
+    return letterScore
+  }
+
+  const getBonusesText = () => {
+    const bonuses = []
+
+    letterStates.forEach(({ bonus, isBlank }, index) => {
+      if (bonus === "dls") bonuses.push(`${letterStates[index].letter}(DLS)`)
+      if (bonus === "tls") bonuses.push(`${letterStates[index].letter}(TLS)`)
+      if (isBlank) bonuses.push(`${letterStates[index].letter}(Blank)`)
+    })
+
+    if (hasDoubleWord) bonuses.push("DWS")
+    if (hasTripleWord) bonuses.push("TWS")
+    if (hasBingo) bonuses.push("Bingo +50")
+
+    return bonuses
+  }
+
+  const getBonusColor = (bonus: BonusType) => {
+    switch (bonus) {
+      case "dls":
+        return "bg-sky-200 border-sky-400 text-sky-900" // Light blue for Double Letter Score
+      case "tls":
+        return "bg-blue-600 border-blue-700 text-white" // Dark blue for Triple Letter Score
+      default:
+        return "bg-green-100 border-green-300 text-green-800" // Default green like the board
+    }
+  }
+
+  const getBonusLabel = (bonus: BonusType) => {
+    switch (bonus) {
+      case "dls":
+        return "DLS"
+      case "tls":
+        return "TLS"
+      default:
+        return ""
+    }
+  }
+
+  const confirmTurn = () => {
+    if (!word.trim()) return
+
+    const score = calculateScore()
+    const bonuses = getBonusesText()
+
+    // Update player score
+    const newPlayers = [...players]
+    newPlayers[currentPlayerIndex].score += score
+    setPlayers(newPlayers)
+
+    // Add to turn history
+    const newTurn: Turn = {
+      player: players[currentPlayerIndex].name,
+      word: word.toUpperCase(),
+      score,
+      bonuses,
+    }
+    setTurnHistory([...turnHistory, newTurn])
+
+    // Reset turn state
+    setWord("")
+    setLetterStates([])
+    setHasDoubleWord(false)
+    setHasTripleWord(false)
+    setHasBingo(false)
+
+    // Move to next player
+    setCurrentPlayerIndex((currentPlayerIndex + 1) % players.length)
+  }
+
+  if (!gameStarted) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 p-4">
+        <div className="max-w-md mx-auto pt-20">
+          <Card>
+            <CardHeader className="text-center">
+              <CardTitle className="flex items-center justify-center gap-2 text-2xl">
+                <Trophy className="w-6 h-6 text-yellow-600" />
+                Scrabble Score Keeper
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium mb-2">Number of Players</label>
+                <div className="flex gap-2">
+                  {[1, 2, 3, 4].map((count) => (
+                    <Button
+                      key={count}
+                      variant={playerCount === count ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setPlayerCount(count)}
+                      className="flex-1"
+                    >
+                      {count}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <label className="block text-sm font-medium">Player Names</label>
+                {tempPlayerNames.slice(0, playerCount).map((name, index) => (
+                  <Input
+                    key={index}
+                    value={name}
+                    onChange={(e) => {
+                      const newNames = [...tempPlayerNames]
+                      newNames[index] = e.target.value
+                      setTempPlayerNames(newNames)
+                    }}
+                    placeholder={`Player ${index + 1}`}
+                  />
+                ))}
+              </div>
+
+              <Button onClick={startGame} className="w-full" size="lg">
+                <Users className="w-4 h-4 mr-2" />
+                Start Game
+              </Button>
+            </CardContent>
+          </Card>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </div>
+    )
+  }
+
+  const getWordBonusColor = (bonusText: string) => {
+    if (bonusText === "DWS") return "bg-orange-400 text-orange-900"
+    if (bonusText === "TWS") return "bg-red-500 text-white"
+    if (bonusText === "Bingo +50") return "bg-yellow-400 text-yellow-900"
+    return "bg-gray-200 text-gray-800"
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 p-4">
+      <div className="max-w-4xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold flex items-center gap-2">
+            <Trophy className="w-6 h-6 text-yellow-600" />
+            Scrabble Score Keeper
+          </h1>
+          <Button onClick={newGame} variant="outline" size="sm">
+            <RotateCcw className="w-4 h-4 mr-2" />
+            New Game
+          </Button>
+        </div>
+
+        <div className="grid lg:grid-cols-2 gap-6">
+          {/* Left Column - Score Entry */}
+          <div className="space-y-6">
+            {/* Current Player */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Current Turn: {players[currentPlayerIndex]?.name}</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Word</label>
+                  <Input
+                    value={word}
+                    onChange={(e) => setWord(e.target.value)}
+                    placeholder="Enter word..."
+                    className="text-lg"
+                  />
+                </div>
+
+                {/* Letter Bonuses */}
+                {word && (
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Letter Bonuses</label>
+                    <div className="flex flex-wrap gap-3">
+                      {letterStates.map((letterState, index) => (
+                        <div key={index} className="flex flex-col items-center gap-2">
+                          <Tile
+                            letter={letterState.letter}
+                            points={LETTER_VALUES[letterState.letter] || 0}
+                            bonus={letterState.bonus}
+                            isBlank={letterState.isBlank}
+                            onClick={() => toggleLetterBonus(index)}
+                          />
+                          <div className="flex items-center gap-1">
+                            <Checkbox
+                              checked={letterState.isBlank}
+                              onCheckedChange={(checked) => {
+                                if (typeof checked === 'boolean') {
+                                  const newStates = [...letterStates]
+                                  newStates[index].isBlank = checked
+                                  setLetterStates(newStates)
+                                }
+                              }}
+                              className="w-3 h-3"
+                            />
+                            <span className="text-xs">Blank</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-xs text-gray-600 mt-2">Click tiles to cycle: Normal → DLS → TLS</p>
+                  </div>
+                )}
+
+                {/* Word Multipliers */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      checked={hasDoubleWord} 
+                      onCheckedChange={(checked) => {
+                        if (typeof checked === 'boolean') setHasDoubleWord(checked)
+                      }} 
+                    />
+                    <label className="text-sm font-medium flex items-center gap-2">
+                      <span className="w-4 h-4 bg-orange-400 border border-orange-500 rounded"></span>
+                      Double Word Score
+                    </label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox 
+                      checked={hasTripleWord} 
+                      onCheckedChange={(checked) => {
+                        if (typeof checked === 'boolean') setHasTripleWord(checked)
+                      }} 
+                    />
+                    <label className="text-sm font-medium flex items-center gap-2">
+                      <span className="w-4 h-4 bg-red-500 border border-red-600 rounded"></span>
+                      Triple Word Score
+                    </label>
+                  </div>
+                </div>
+
+                {/* Bingo Bonus */}
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    checked={hasBingo} 
+                    onCheckedChange={(checked) => {
+                      if (typeof checked === 'boolean') setHasBingo(checked)
+                    }} 
+                  />
+                  <label className="text-sm font-medium">7-Letter Bingo (+50 points)</label>
+                </div>
+
+                {/* Score Preview */}
+                {word && (
+                  <div className="bg-gray-50 p-3 rounded">
+                    <div className="text-sm text-gray-600">Calculated Score:</div>
+                    <div className="text-2xl font-bold text-green-600">{calculateScore()} points</div>
+                  </div>
+                )}
+
+                <Button onClick={confirmTurn} disabled={!word.trim()} className="w-full" size="lg">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Confirm Turn
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Right Column - Scores & History */}
+          <div className="space-y-6">
+            {/* Current Scores */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Current Scores</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {players.map((player, index) => (
+                    <div
+                      key={index}
+                      className={`flex justify-between items-center p-3 rounded ${
+                        index === currentPlayerIndex ? "bg-blue-50 border border-blue-200" : "bg-gray-50"
+                      }`}
+                    >
+                      <span className="font-medium">{player.name}</span>
+                      <span className="text-xl font-bold">{player.score}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Turn History */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Turn History</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="max-h-96 overflow-y-auto space-y-3">
+                  {turnHistory.length === 0 ? (
+                    <p className="text-gray-500 text-center py-4">No turns played yet</p>
+                  ) : (
+                    turnHistory
+                      .slice()
+                      .reverse()
+                      .map((turn, index) => (
+                        <div key={index} className="border rounded-lg p-4 bg-white">
+                          <div className="flex justify-between items-start mb-3">
+                            <div className="font-medium text-sm text-gray-600">{turn.player}</div>
+                            <div className="text-xl font-bold text-green-600">+{turn.score}</div>
+                          </div>
+
+                          {/* Word displayed as tiles */}
+                          <div className="flex flex-wrap gap-1 mb-2">
+                            {turn.word.split("").map((letter, letterIndex) => {
+                              // Determine if this letter had bonuses based on the bonuses array
+                              const letterBonus = turn.bonuses.find((b) => b.startsWith(`${letter}(`))
+                              let bonus: BonusType = "normal"
+                              let isBlank = false
+
+                              if (letterBonus) {
+                                if (letterBonus.includes("DLS")) bonus = "dls"
+                                else if (letterBonus.includes("TLS")) bonus = "tls"
+                                if (letterBonus.includes("Blank")) isBlank = true
+                              }
+
+                              return (
+                                <Tile
+                                  key={letterIndex}
+                                  letter={letter}
+                                  points={LETTER_VALUES[letter] || 0}
+                                  bonus={bonus}
+                                  isBlank={isBlank}
+                                  className="scale-75"
+                                />
+                              )
+                            })}
+                          </div>
+
+                          {/* Other bonuses */}
+                          {turn.bonuses.length > 0 && (
+                            <div className="flex flex-wrap gap-1">
+                              {turn.bonuses
+                                .filter((bonus) => !bonus.includes("(") || bonus.includes("Bingo"))
+                                .map((bonus, bonusIndex) => (
+                                  <Badge
+                                    key={bonusIndex}
+                                    className={`text-xs ${getWordBonusColor(bonus)}`}
+                                    variant="secondary"
+                                  >
+                                    {bonus}
+                                  </Badge>
+                                ))}
+                            </div>
+                          )}
+                        </div>
+                      ))
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
     </div>
-  );
+  )
 }
