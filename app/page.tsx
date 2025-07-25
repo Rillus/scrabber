@@ -71,6 +71,7 @@ export default function ScrabbleScoreKeeper() {
   const [hasBingo, setHasBingo] = useState(false)
   const [turnHistory, setTurnHistory] = useState<Turn[]>([])
   const [tempPlayerNames, setTempPlayerNames] = useState<string[]>(["Player 1", "Player 2"])
+  const [wordInputRef, setWordInputRef] = useState<HTMLInputElement | null>(null)
 
   // Update tempPlayerNames when playerCount changes
   useEffect(() => {
@@ -87,6 +88,13 @@ export default function ScrabbleScoreKeeper() {
     }))
     setLetterStates(newStates)
   }, [word])
+
+  // Focus word input when game starts or player changes
+  useEffect(() => {
+    if (gameStarted && wordInputRef) {
+      wordInputRef.focus()
+    }
+  }, [gameStarted, currentPlayerIndex, wordInputRef])
 
   const startGame = () => {
     const newPlayers = tempPlayerNames.map((name) => ({ name, score: 0 }))
@@ -197,6 +205,13 @@ export default function ScrabbleScoreKeeper() {
 
     // Move to next player
     setCurrentPlayerIndex((currentPlayerIndex + 1) % players.length)
+
+    // Refocus the input after a short delay to ensure state updates
+    setTimeout(() => {
+      if (wordInputRef) {
+        wordInputRef.focus()
+      }
+    }, 100)
   }
 
   if (!gameStarted) {
@@ -289,8 +304,14 @@ export default function ScrabbleScoreKeeper() {
                 <div>
                   <label className="block text-sm font-medium mb-2">Word</label>
                   <Input
+                    ref={setWordInputRef}
                     value={word}
                     onChange={(e) => setWord(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && word.trim()) {
+                        confirmTurn()
+                      }
+                    }}
                     placeholder="Enter word..."
                     className="text-lg"
                   />
