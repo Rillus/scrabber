@@ -1,0 +1,177 @@
+// Button component styles with SUIT CSS naming convention
+
+.Button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  white-space: nowrap;
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  transition: all var(--transition-normal);
+  pointer-events: auto;
+  opacity: 1;
+  outline: none;
+  border: none;
+  background: none;
+  cursor: pointer;
+  flex-shrink: 0;
+
+  // SVG icon styles
+  svg {
+    pointer-events: none;
+    flex-shrink: 0;
+    
+    &:not([class*='size-']) {
+      width: var(--space-4);
+      height: var(--space-4);
+    }
+  }
+
+  // Focus states
+  &:focus-visible {
+    border-color: var(--ring);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 50%, transparent);
+  }
+
+  // Invalid state
+  &[aria-invalid="true"] {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--destructive) 20%, transparent);
+    border-color: var(--destructive);
+  }
+
+  // Disabled state
+  &:disabled {
+    pointer-events: none;
+    opacity: 0.5;
+  }
+
+  // Variants
+  &--default {
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+    box-shadow: var(--shadow-xs);
+
+    &:hover:not(:disabled) {
+      background-color: color-mix(in srgb, var(--primary) 90%, transparent);
+    }
+  }
+
+  &--destructive {
+    background-color: var(--destructive);
+    color: white;
+    box-shadow: var(--shadow-xs);
+
+    &:hover:not(:disabled) {
+      background-color: color-mix(in srgb, var(--destructive) 90%, transparent);
+    }
+
+    &:focus-visible {
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--destructive) 20%, transparent);
+    }
+  }
+
+  &--outline {
+    border: 1px solid var(--border);
+    background-color: var(--background);
+    box-shadow: var(--shadow-xs);
+
+    &:hover:not(:disabled) {
+      background-color: var(--accent);
+      color: var(--accent-foreground);
+    }
+  }
+
+  &--secondary {
+    background-color: var(--secondary);
+    color: var(--secondary-foreground);
+    box-shadow: var(--shadow-xs);
+
+    &:hover:not(:disabled) {
+      background-color: color-mix(in srgb, var(--secondary) 80%, transparent);
+    }
+  }
+
+  &--ghost {
+    &:hover:not(:disabled) {
+      background-color: var(--accent);
+      color: var(--accent-foreground);
+    }
+  }
+
+  &--link {
+    color: var(--primary);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+
+    &:hover:not(:disabled) {
+      text-decoration: underline;
+    }
+  }
+
+  // Sizes
+  &--default {
+    height: calc(var(--space-4) + var(--space-5));
+    padding: var(--space-2) var(--space-4);
+
+    &:has(> svg) {
+      padding-left: var(--space-3);
+      padding-right: var(--space-3);
+    }
+  }
+
+  &--sm {
+    height: var(--space-8);
+    border-radius: var(--radius-md);
+    gap: calc(var(--space-2) - 0.5px);
+    padding: 0 var(--space-3);
+
+    &:has(> svg) {
+      padding-left: calc(var(--space-2) + 0.5px);
+      padding-right: calc(var(--space-2) + 0.5px);
+    }
+  }
+
+  &--lg {
+    height: var(--space-10);
+    border-radius: var(--radius-md);
+    padding: 0 var(--space-6);
+
+    &:has(> svg) {
+      padding-left: var(--space-4);
+      padding-right: var(--space-4);
+    }
+  }
+
+  &--icon {
+    width: calc(var(--space-4) + var(--space-5));
+    height: calc(var(--space-4) + var(--space-5));
+  }
+
+  // Dark mode overrides
+  .dark &--outline {
+    background-color: color-mix(in srgb, var(--input) 30%, transparent);
+    border-color: var(--input);
+
+    &:hover:not(:disabled) {
+      background-color: color-mix(in srgb, var(--input) 50%, transparent);
+    }
+  }
+
+  .dark &--ghost:hover:not(:disabled) {
+    background-color: color-mix(in srgb, var(--accent) 50%, transparent);
+  }
+
+  .dark &--destructive {
+    background-color: color-mix(in srgb, var(--destructive) 60%, transparent);
+
+    &:focus-visible {
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--destructive) 40%, transparent);
+    }
+  }
+
+  .dark &[aria-invalid="true"] {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--destructive) 40%, transparent);
+  }
+}

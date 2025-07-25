@@ -1,0 +1,43 @@
+// Input component styles with SUIT CSS naming convention
+
+.Input {
+  display: flex;
+  height: var(--space-10);
+  width: 100%;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--input);
+  background-color: var(--background);
+  padding: 0 var(--space-3);
+  font-size: var(--text-sm);
+  transition: all var(--transition-normal);
+  outline: none;
+
+  &::placeholder {
+    color: var(--muted-foreground);
+  }
+
+  &:focus {
+    border-color: var(--ring);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 50%, transparent);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  // File input specific styles
+  &[type="file"] {
+    padding: var(--space-2) var(--space-3);
+    cursor: pointer;
+
+    &::-webkit-file-upload-button {
+      background: none;
+      border: none;
+      font: inherit;
+      color: inherit;
+      cursor: pointer;
+      margin-right: var(--space-2);
+    }
+  }
+}

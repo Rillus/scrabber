@@ -1,0 +1,81 @@
+// Grid layout styles with SUIT CSS naming convention
+
+.Grid {
+  display: grid;
+  gap: var(--space-4);
+
+  // Grid columns
+  &--cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+  &--cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  &--cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  &--cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  &--cols-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  &--cols-6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  &--cols-12 { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+
+  // Gap sizes
+  &--gap-0 { gap: 0; }
+  &--gap-1 { gap: var(--space-1); }
+  &--gap-2 { gap: var(--space-2); }
+  &--gap-3 { gap: var(--space-3); }
+  &--gap-4 { gap: var(--space-4); }
+  &--gap-5 { gap: var(--space-5); }
+  &--gap-6 { gap: var(--space-6); }
+  &--gap-8 { gap: var(--space-8); }
+  &--gap-10 { gap: var(--space-10); }
+  &--gap-12 { gap: var(--space-12); }
+  &--gap-16 { gap: var(--space-16); }
+  &--gap-20 { gap: var(--space-20); }
+  &--gap-24 { gap: var(--space-24); }
+
+  // Responsive grid columns
+  @media (min-width: 640px) {
+    &--sm-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+    &--sm-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    &--sm-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    &--sm-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    &--sm-cols-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+    &--sm-cols-6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+    &--sm-cols-12 { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+  }
+
+  @media (min-width: 768px) {
+    &--md-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+    &--md-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    &--md-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    &--md-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    &--md-cols-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+    &--md-cols-6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+    &--md-cols-12 { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+  }
+
+  @media (min-width: 1024px) {
+    &--lg-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+    &--lg-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    &--lg-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    &--lg-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    &--lg-cols-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+    &--lg-cols-6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+    &--lg-cols-12 { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+  }
+
+  @media (min-width: 1280px) {
+    &--xl-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+    &--xl-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    &--xl-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    &--xl-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    &--xl-cols-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+    &--xl-cols-6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+    &--xl-cols-12 { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+  }
+
+  @media (min-width: 1536px) {
+    &--2xl-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+    &--2xl-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    &--2xl-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    &--2xl-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    &--2xl-cols-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+    &--2xl-cols-6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+    &--2xl-cols-12 { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+  }
+}

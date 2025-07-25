@@ -1,0 +1,63 @@
+// Shadow utilities with SUIT CSS naming convention
+
+.u-shadow-none { box-shadow: none; }
+.u-shadow-xs { box-shadow: var(--shadow-xs); }
+.u-shadow-sm { box-shadow: var(--shadow-sm); }
+.u-shadow { box-shadow: var(--shadow-sm); }
+.u-shadow-md { box-shadow: var(--shadow-md); }
+.u-shadow-lg { box-shadow: var(--shadow-lg); }
+.u-shadow-xl { box-shadow: var(--shadow-xl); }
+.u-shadow-2xl { box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25); }
+.u-shadow-inner { box-shadow: inset 0 2px 4px 0 rgb(0 0 0 / 0.05); }
+
+// Ring utilities (for focus states)
+.u-ring-0 { box-shadow: 0 0 0 0 rgb(0 0 0 / 0); }
+.u-ring-1 { box-shadow: 0 0 0 1px rgb(0 0 0 / 0.05); }
+.u-ring-2 { box-shadow: 0 0 0 2px rgb(0 0 0 / 0.05); }
+.u-ring-4 { box-shadow: 0 0 0 4px rgb(0 0 0 / 0.05); }
+.u-ring-8 { box-shadow: 0 0 0 8px rgb(0 0 0 / 0.05); }
+
+.u-ring-ring { box-shadow: 0 0 0 3px var(--ring); }
+.u-ring-ring-50 { box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 50%, transparent); }
+.u-ring-destructive { box-shadow: 0 0 0 3px var(--destructive); }
+.u-ring-destructive-20 { box-shadow: 0 0 0 3px color-mix(in srgb, var(--destructive) 20%, transparent); }
+.u-ring-destructive-40 { box-shadow: 0 0 0 3px color-mix(in srgb, var(--destructive) 40%, transparent); }
+
+// Focus ring utilities
+.u-ring-offset-0 { --tw-ring-offset-width: 0px; }
+.u-ring-offset-1 { --tw-ring-offset-width: 1px; }
+.u-ring-offset-2 { --tw-ring-offset-width: 2px; }
+.u-ring-offset-4 { --tw-ring-offset-width: 4px; }
+.u-ring-offset-8 { --tw-ring-offset-width: 8px; }
+
+// Focus visible utilities
+.u-focus-visible-ring-ring { 
+  &:focus-visible {
+    box-shadow: 0 0 0 3px var(--ring);
+  }
+}
+
+.u-focus-visible-ring-ring-50 { 
+  &:focus-visible {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 50%, transparent);
+  }
+}
+
+.u-focus-visible-ring-destructive-20 { 
+  &:focus-visible {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--destructive) 20%, transparent);
+  }
+}
+
+.u-focus-visible-ring-destructive-40 { 
+  &:focus-visible {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--destructive) 40%, transparent);
+  }
+}
+
+// Dark mode focus ring utilities
+.dark .u-focus-visible-ring-destructive-40 {
+  &:focus-visible {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--destructive) 40%, transparent);
+  }
+}
