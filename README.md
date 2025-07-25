@@ -58,3 +58,5 @@ npm run test:coverage
 ## License
 
 This project is private and proprietary.
+
+v1
