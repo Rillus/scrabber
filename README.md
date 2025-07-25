@@ -1,4 +1,15 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Scrabber: score keeper for Scrabble
+
+A modern web application for tracking Scrabble scores with automatic calculation and visual tile representation. Built with Next.js, React, and TypeScript.
+
+## Features
+
+- **Game Setup**: Support for 1-4 players with custom names
+- **Visual Tile Representation**: Each letter displayed as a tile with its point value
+- **Automatic Score Calculation**: Handles letter bonuses (DLS/TLS), word multipliers (DWS/TWS), and bingo bonuses
+- **Turn History**: Visual representation of played words with scores
+- **Responsive Design**: Works on desktop, tablet, and mobile devices
+- **Real-time Updates**: Instant score calculation and turn confirmation
 
 ## Getting Started
 
@@ -14,23 +25,36 @@ pnpm dev
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the application.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Testing
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Run the test suite:
 
-## Learn More
+```bash
+npm test
+# or
+npm run test:watch
+# or
+npm run test:coverage
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Technology Stack
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Framework**: Next.js 15 with App Router
+- **UI Library**: React 19 with TypeScript
+- **Styling**: Tailwind CSS with shadcn/ui components
+- **Testing**: Jest with React Testing Library
+- **Icons**: Lucide React
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Project Structure
 
-## Deploy on Vercel
+- `app/` - Next.js app router pages and layout
+- `components/ui/` - Reusable UI components
+- `__tests__/` - Test files organized by feature
+- `docs/` - Project documentation including PRD
+- `lib/` - Utility functions and score calculation logic
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## License
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This project is private and proprietary.

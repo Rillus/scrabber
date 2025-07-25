@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import React, { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -207,7 +207,7 @@ export default function ScrabbleScoreKeeper() {
             <CardHeader className="text-center">
               <CardTitle className="flex items-center justify-center gap-2 text-2xl">
                 <Trophy className="w-6 h-6 text-yellow-600" />
-                Scrabble Score Keeper
+                Scrabber: score keeper for Scrabble
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -269,7 +269,7 @@ export default function ScrabbleScoreKeeper() {
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <Trophy className="w-6 h-6 text-yellow-600" />
-            Scrabble Score Keeper
+            Scrabber: score keeper for Scrabble
           </h1>
           <Button onClick={newGame} variant="outline" size="sm">
             <RotateCcw className="w-4 h-4 mr-2" />

@@ -1,4 +1,4 @@
-# Product Requirements Document: Scrabble Score Keeper
+# Product Requirements Document: Scrabber: score keeper for Scrabble
 
 ## 1. Introduction
 This document outlines the requirements for a web-based application designed to help users efficiently track scores during a game of Scrabble. The application will simplify scorekeeping by allowing players to input words, mark bonus squares, and automatically calculate scores for each turn, maintaining a running total for up to four players.
@@ -141,4 +141,4 @@ This document outlines the requirements for a web-based application designed to 
 - Client-side state management with React hooks
 - No backend required - all data persists in browser session
 
-The application successfully meets all the MVP requirements outlined in this PRD and provides a fully functional Scrabble score keeper with an intuitive, modern interface. 
+The application successfully meets all the MVP requirements outlined in this PRD and provides a fully functional Scrabber score keeper with an intuitive, modern interface. 
