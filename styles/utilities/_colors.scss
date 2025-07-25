@@ -1,0 +1,100 @@
+// Color utilities with SUIT CSS naming convention
+
+// Background colors
+.u-bg-background { background-color: var(--background); }
+.u-bg-foreground { background-color: var(--foreground); }
+.u-bg-card { background-color: var(--card); }
+.u-bg-card-foreground { background-color: var(--card-foreground); }
+.u-bg-popover { background-color: var(--popover); }
+.u-bg-popover-foreground { background-color: var(--popover-foreground); }
+.u-bg-primary { background-color: var(--primary); }
+.u-bg-primary-foreground { background-color: var(--primary-foreground); }
+.u-bg-secondary { background-color: var(--secondary); }
+.u-bg-secondary-foreground { background-color: var(--secondary-foreground); }
+.u-bg-muted { background-color: var(--muted); }
+.u-bg-muted-foreground { background-color: var(--muted-foreground); }
+.u-bg-accent { background-color: var(--accent); }
+.u-bg-accent-foreground { background-color: var(--accent-foreground); }
+.u-bg-destructive { background-color: var(--destructive); }
+.u-bg-border { background-color: var(--border); }
+.u-bg-input { background-color: var(--input); }
+.u-bg-ring { background-color: var(--ring); }
+.u-bg-transparent { background-color: transparent; }
+
+// Border colors
+.u-border-border { border-color: var(--border); }
+.u-border-input { border-color: var(--input); }
+.u-border-ring { border-color: var(--ring); }
+.u-border-primary { border-color: var(--primary); }
+.u-border-secondary { border-color: var(--secondary); }
+.u-border-destructive { border-color: var(--destructive); }
+.u-border-transparent { border-color: transparent; }
+
+// Text colors
+.u-text-foreground { color: var(--foreground); }
+.u-text-card-foreground { color: var(--card-foreground); }
+.u-text-popover-foreground { color: var(--popover-foreground); }
+.u-text-primary { color: var(--primary); }
+.u-text-primary-foreground { color: var(--primary-foreground); }
+.u-text-secondary { color: var(--secondary-foreground); }
+.u-text-muted { color: var(--muted-foreground); }
+.u-text-accent { color: var(--accent-foreground); }
+.u-text-destructive { color: var(--destructive); }
+.u-text-border { color: var(--border); }
+.u-text-input { color: var(--input); }
+.u-text-ring { color: var(--ring); }
+.u-text-transparent { color: transparent; }
+
+// Opacity modifiers
+.u-bg-opacity-0 { background-color: transparent; }
+.u-bg-opacity-10 { background-color: color-mix(in srgb, currentColor 10%, transparent); }
+.u-bg-opacity-20 { background-color: color-mix(in srgb, currentColor 20%, transparent); }
+.u-bg-opacity-30 { background-color: color-mix(in srgb, currentColor 30%, transparent); }
+.u-bg-opacity-40 { background-color: color-mix(in srgb, currentColor 40%, transparent); }
+.u-bg-opacity-50 { background-color: color-mix(in srgb, currentColor 50%, transparent); }
+.u-bg-opacity-60 { background-color: color-mix(in srgb, currentColor 60%, transparent); }
+.u-bg-opacity-70 { background-color: color-mix(in srgb, currentColor 70%, transparent); }
+.u-bg-opacity-80 { background-color: color-mix(in srgb, currentColor 80%, transparent); }
+.u-bg-opacity-90 { background-color: color-mix(in srgb, currentColor 90%, transparent); }
+.u-bg-opacity-100 { background-color: currentColor; }
+
+// Chart colors
+.u-bg-chart-1 { background-color: var(--chart-1); }
+.u-bg-chart-2 { background-color: var(--chart-2); }
+.u-bg-chart-3 { background-color: var(--chart-3); }
+.u-bg-chart-4 { background-color: var(--chart-4); }
+.u-bg-chart-5 { background-color: var(--chart-5); }
+
+.u-text-chart-1 { color: var(--chart-1); }
+.u-text-chart-2 { color: var(--chart-2); }
+.u-text-chart-3 { color: var(--chart-3); }
+.u-text-chart-4 { color: var(--chart-4); }
+.u-text-chart-5 { color: var(--chart-5); }
+
+// Sidebar colors
+.u-bg-sidebar { background-color: var(--sidebar); }
+.u-bg-sidebar-foreground { background-color: var(--sidebar-foreground); }
+.u-bg-sidebar-primary { background-color: var(--sidebar-primary); }
+.u-bg-sidebar-primary-foreground { background-color: var(--sidebar-primary-foreground); }
+.u-bg-sidebar-accent { background-color: var(--sidebar-accent); }
+.u-bg-sidebar-accent-foreground { background-color: var(--sidebar-accent-foreground); }
+.u-bg-sidebar-border { background-color: var(--sidebar-border); }
+.u-bg-sidebar-ring { background-color: var(--sidebar-ring); }
+
+.u-text-sidebar { color: var(--sidebar); }
+.u-text-sidebar-foreground { color: var(--sidebar-foreground); }
+.u-text-sidebar-primary { color: var(--sidebar-primary); }
+.u-text-sidebar-primary-foreground { color: var(--sidebar-primary-foreground); }
+.u-text-sidebar-accent { color: var(--sidebar-accent); }
+.u-text-sidebar-accent-foreground { color: var(--sidebar-accent-foreground); }
+.u-text-sidebar-border { color: var(--sidebar-border); }
+.u-text-sidebar-ring { color: var(--sidebar-ring); }
+
+.u-border-sidebar { border-color: var(--sidebar); }
+.u-border-sidebar-foreground { border-color: var(--sidebar-foreground); }
+.u-border-sidebar-primary { border-color: var(--sidebar-primary); }
+.u-border-sidebar-primary-foreground { border-color: var(--sidebar-primary-foreground); }
+.u-border-sidebar-accent { border-color: var(--sidebar-accent); }
+.u-border-sidebar-accent-foreground { border-color: var(--sidebar-accent-foreground); }
+.u-border-sidebar-border { border-color: var(--sidebar-border); }
+.u-border-sidebar-ring { border-color: var(--sidebar-ring); }

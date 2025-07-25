@@ -1,0 +1,190 @@
+// Typography styles with SUIT CSS naming convention
+
+// Text sizes
+.u-text-xs {
+  font-size: var(--text-xs);
+  line-height: 1rem;
+}
+
+.u-text-sm {
+  font-size: var(--text-sm);
+  line-height: 1.25rem;
+}
+
+.u-text-base {
+  font-size: var(--text-base);
+  line-height: 1.5rem;
+}
+
+.u-text-lg {
+  font-size: var(--text-lg);
+  line-height: 1.75rem;
+}
+
+.u-text-xl {
+  font-size: var(--text-xl);
+  line-height: 1.75rem;
+}
+
+.u-text-2xl {
+  font-size: var(--text-2xl);
+  line-height: 2rem;
+}
+
+.u-text-3xl {
+  font-size: var(--text-3xl);
+  line-height: 2.25rem;
+}
+
+.u-text-4xl {
+  font-size: var(--text-4xl);
+  line-height: 2.5rem;
+}
+
+// Font weights
+.u-font-normal {
+  font-weight: var(--font-normal);
+}
+
+.u-font-medium {
+  font-weight: var(--font-medium);
+}
+
+.u-font-semibold {
+  font-weight: var(--font-semibold);
+}
+
+.u-font-bold {
+  font-weight: var(--font-bold);
+}
+
+// Text colors
+.u-text-foreground {
+  color: var(--foreground);
+}
+
+.u-text-muted {
+  color: var(--muted-foreground);
+}
+
+.u-text-primary {
+  color: var(--primary);
+}
+
+.u-text-secondary {
+  color: var(--secondary-foreground);
+}
+
+.u-text-accent {
+  color: var(--accent-foreground);
+}
+
+.u-text-destructive {
+  color: var(--destructive);
+}
+
+// Text alignment
+.u-text-left {
+  text-align: left;
+}
+
+.u-text-center {
+  text-align: center;
+}
+
+.u-text-right {
+  text-align: right;
+}
+
+.u-text-justify {
+  text-align: justify;
+}
+
+// Text decoration
+.u-underline {
+  text-decoration: underline;
+}
+
+.u-no-underline {
+  text-decoration: none;
+}
+
+.u-line-through {
+  text-decoration: line-through;
+}
+
+// Text transform
+.u-uppercase {
+  text-transform: uppercase;
+}
+
+.u-lowercase {
+  text-transform: lowercase;
+}
+
+.u-capitalize {
+  text-transform: capitalize;
+}
+
+.u-normal-case {
+  text-transform: none;
+}
+
+// Line height
+.u-leading-none {
+  line-height: 1;
+}
+
+.u-leading-tight {
+  line-height: 1.25;
+}
+
+.u-leading-snug {
+  line-height: 1.375;
+}
+
+.u-leading-normal {
+  line-height: 1.5;
+}
+
+.u-leading-relaxed {
+  line-height: 1.625;
+}
+
+.u-leading-loose {
+  line-height: 2;
+}
+
+// Whitespace
+.u-whitespace-normal {
+  white-space: normal;
+}
+
+.u-whitespace-nowrap {
+  white-space: nowrap;
+}
+
+.u-whitespace-pre {
+  white-space: pre;
+}
+
+.u-whitespace-pre-line {
+  white-space: pre-line;
+}
+
+.u-whitespace-pre-wrap {
+  white-space: pre-wrap;
+}
+
+.u-break-normal {
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+.u-break-words {
+  overflow-wrap: break-word;
+}
+
+.u-break-all {
+  word-break: break-all;
+}

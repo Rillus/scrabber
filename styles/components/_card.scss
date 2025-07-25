@@ -1,0 +1,66 @@
+// Card component styles with SUIT CSS naming convention
+
+.Card {
+  background-color: var(--card);
+  color: var(--card-foreground);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-sm);
+}
+
+.CardHeader {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto auto;
+  align-items: start;
+  gap: calc(var(--space-2) - 0.5px);
+  padding: 0 var(--space-6);
+  padding-bottom: var(--space-6);
+
+  // When there's a card action, adjust grid
+  &:has([data-slot="card-action"]) {
+    grid-template-columns: 1fr auto;
+  }
+
+  // When there's a border bottom
+  &.border-b {
+    padding-bottom: var(--space-6);
+  }
+}
+
+.CardTitle {
+  font-weight: var(--font-semibold);
+  line-height: 1;
+}
+
+.CardDescription {
+  color: var(--muted-foreground);
+  font-size: var(--text-sm);
+}
+
+.CardAction {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: start;
+  justify-self: end;
+}
+
+.CardContent {
+  padding: 0 var(--space-6);
+}
+
+.CardFooter {
+  display: flex;
+  align-items: center;
+  padding: 0 var(--space-6);
+  padding-top: var(--space-6);
+
+  // When there's a border top
+  &.border-t {
+    padding-top: var(--space-6);
+  }
+}

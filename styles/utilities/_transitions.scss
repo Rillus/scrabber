@@ -1,0 +1,166 @@
+// Transition utilities with SUIT CSS naming convention
+
+// Transition property
+.u-transition-none { transition-property: none; }
+.u-transition-all { transition-property: all; }
+.u-transition { transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter; }
+.u-transition-colors { transition-property: color, background-color, border-color, text-decoration-color, fill, stroke; }
+.u-transition-opacity { transition-property: opacity; }
+.u-transition-shadow { transition-property: box-shadow; }
+.u-transition-transform { transition-property: transform; }
+
+// Transition duration
+.u-duration-75 { transition-duration: 75ms; }
+.u-duration-100 { transition-duration: 100ms; }
+.u-duration-150 { transition-duration: 150ms; }
+.u-duration-200 { transition-duration: 200ms; }
+.u-duration-300 { transition-duration: 300ms; }
+.u-duration-500 { transition-duration: 500ms; }
+.u-duration-700 { transition-duration: 700ms; }
+.u-duration-1000 { transition-duration: 1000ms; }
+
+// Transition timing function
+.u-ease-linear { transition-timing-function: linear; }
+.u-ease-in { transition-timing-function: cubic-bezier(0.4, 0, 1, 1); }
+.u-ease-out { transition-timing-function: cubic-bezier(0, 0, 0.2, 1); }
+.u-ease-in-out { transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); }
+
+// Transition delay
+.u-delay-75 { transition-delay: 75ms; }
+.u-delay-100 { transition-delay: 100ms; }
+.u-delay-150 { transition-delay: 150ms; }
+.u-delay-200 { transition-delay: 200ms; }
+.u-delay-300 { transition-delay: 300ms; }
+.u-delay-500 { transition-delay: 500ms; }
+.u-delay-700 { transition-delay: 700ms; }
+.u-delay-1000 { transition-delay: 1000ms; }
+
+// Combined transition utilities
+.u-transition-fast { 
+  transition: all var(--transition-fast);
+}
+
+.u-transition-normal { 
+  transition: all var(--transition-normal);
+}
+
+.u-transition-slow { 
+  transition: all var(--transition-slow);
+}
+
+// Hover transitions
+.u-hover-transition-all {
+  transition: all var(--transition-normal);
+  
+  &:hover {
+    transition: all var(--transition-normal);
+  }
+}
+
+.u-hover-transition-colors {
+  transition: color var(--transition-normal), 
+              background-color var(--transition-normal), 
+              border-color var(--transition-normal);
+  
+  &:hover {
+    transition: color var(--transition-normal), 
+                background-color var(--transition-normal), 
+                border-color var(--transition-normal);
+  }
+}
+
+.u-hover-transition-opacity {
+  transition: opacity var(--transition-normal);
+  
+  &:hover {
+    transition: opacity var(--transition-normal);
+  }
+}
+
+.u-hover-transition-shadow {
+  transition: box-shadow var(--transition-normal);
+  
+  &:hover {
+    transition: box-shadow var(--transition-normal);
+  }
+}
+
+.u-hover-transition-transform {
+  transition: transform var(--transition-normal);
+  
+  &:hover {
+    transition: transform var(--transition-normal);
+  }
+}
+
+// Focus transitions
+.u-focus-transition-all {
+  transition: all var(--transition-normal);
+  
+  &:focus {
+    transition: all var(--transition-normal);
+  }
+}
+
+.u-focus-transition-colors {
+  transition: color var(--transition-normal), 
+              background-color var(--transition-normal), 
+              border-color var(--transition-normal);
+  
+  &:focus {
+    transition: color var(--transition-normal), 
+                background-color var(--transition-normal), 
+                border-color var(--transition-normal);
+  }
+}
+
+// Disabled transitions
+.u-disabled-transition-none {
+  &:disabled {
+    transition: none;
+  }
+}
+
+// Animation utilities
+.u-animate-none { animation: none; }
+.u-animate-spin { animation: spin 1s linear infinite; }
+.u-animate-ping { animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite; }
+.u-animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+.u-animate-bounce { animation: bounce 1s infinite; }
+
+// Keyframes
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes ping {
+  75%, 100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: .5;
+  }
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(-25%);
+    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+  }
+  50% {
+    transform: none;
+    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  }
+}
