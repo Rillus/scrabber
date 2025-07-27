@@ -60,4 +60,12 @@
       cursor: not-allowed;
     }
   }
+
+  // Size variants
+  &.Checkbox--sm {
+    .Checkbox__root {
+      width: 0.75rem;
+      height: 0.75rem;
+    }
+  }
 }

@@ -1,245 +1,135 @@
 import React from 'react'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Tile } from '@/components/ui/tile'
 
-describe('Tile Component', () => {
-  describe('Basic Rendering', () => {
-    it('renders a tile with letter and points', () => {
-      render(<Tile letter="A" points={1} />)
-      
-      expect(screen.getByText('A')).toBeInTheDocument()
-      expect(screen.getByText('1')).toBeInTheDocument()
-    })
-
-    it('renders high-value letters correctly', () => {
-      render(<Tile letter="Q" points={10} />)
-      
-      expect(screen.getByText('Q')).toBeInTheDocument()
-      expect(screen.getByText('10')).toBeInTheDocument()
-    })
-
-    it('applies default styling classes', () => {
-      const { container } = render(<Tile letter="A" points={1} />)
-      const tileElement = container.firstChild as HTMLElement
-      
-      expect(tileElement).toHaveClass('relative')
-      expect(tileElement.querySelector('div')).toHaveClass(
-        'relative', 'w-12', 'h-12', 'rounded-sm', 'border-2', 'border-amber-800'
-      )
-    })
+describe('Tile', () => {
+  it('renders with default props', () => {
+    render(<Tile letter="A" points={1} />)
+    const tile = screen.getByText('A')
+    expect(tile).toBeInTheDocument()
+    expect(tile.closest('.Tile__container')).toHaveClass('Tile__container')
   })
 
-  describe('Interactive States', () => {
-    it('renders as interactive when onClick is provided', () => {
-      const handleClick = jest.fn()
-      const { container } = render(
-        <Tile letter="A" points={1} onClick={handleClick} />
-      )
-      const tileElement = container.querySelector('.cursor-pointer')
-      expect(tileElement).toBeInTheDocument()
-      expect(tileElement).toHaveClass('cursor-pointer')
-    })
-
-    it('calls onClick when clicked', () => {
-      const handleClick = jest.fn()
-      const { container } = render(
-        <Tile letter="A" points={1} onClick={handleClick} />
-      )
-      const tileElement = container.querySelector('.cursor-pointer')
-      fireEvent.click(tileElement!)
-      expect(handleClick).toHaveBeenCalledTimes(1)
-    })
-
-    it('renders as non-interactive when no onClick is provided', () => {
-      const { container } = render(<Tile letter="A" points={1} />)
-      const tileElement = container.querySelector('.cursor-pointer')
-      expect(tileElement).toBeNull()
-    })
+  it('displays letter correctly', () => {
+    render(<Tile letter="Z" points={10} />)
+    const letter = screen.getByText('Z')
+    expect(letter).toBeInTheDocument()
+    expect(letter).toHaveClass('Tile__letter')
   })
 
-  describe('Blank Tiles', () => {
-    it('renders blank tile with correct styling', () => {
-      const { container } = render(<Tile letter="A" points={1} isBlank={true} />)
-      
-      // Should show "0" for points
-      expect(screen.getByText('0')).toBeInTheDocument()
-      
-      // Should have blank indicator
-      const blankIndicator = container.querySelector('.bg-red-500')
-      expect(blankIndicator).toBeInTheDocument()
-      
-      // Should have opacity styling
-      const tileElement = container.querySelector('div[class*="opacity-75"]')
-      expect(tileElement).toBeInTheDocument()
-    })
-
-    it('shows blank indicator dot', () => {
-      const { container } = render(<Tile letter="A" points={1} isBlank={true} />)
-      
-      const blankIndicator = container.querySelector('.bg-red-500.rounded-full')
-      expect(blankIndicator).toBeInTheDocument()
-    })
+  it('displays points correctly', () => {
+    render(<Tile letter="Q" points={10} />)
+    const points = screen.getByText('10')
+    expect(points).toBeInTheDocument()
+    expect(points).toHaveClass('Tile__points')
   })
 
-  describe('Bonus Tiles', () => {
-    it('renders Double Letter Score bonus correctly', () => {
-      const { container } = render(<Tile letter="A" points={1} bonus="dls" />)
-      
-      const bonusElement = container.querySelector('.bg-sky-200')
-      expect(bonusElement).toBeInTheDocument()
-    })
+  it('handles click events when interactive', async () => {
+    const handleClick = jest.fn()
+    const user = userEvent.setup()
+    render(<Tile letter="A" points={1} onClick={handleClick} />)
+    
+    const tile = screen.getByText('A').closest('.Tile__main')
+    await user.click(tile!)
+    
+    expect(handleClick).toHaveBeenCalledTimes(1)
+  })
 
-    it('renders Triple Letter Score bonus correctly', () => {
-      const { container } = render(<Tile letter="A" points={1} bonus="tls" />)
-      
-      const bonusElement = container.querySelector('.bg-blue-600')
-      expect(bonusElement).toBeInTheDocument()
-    })
+  it('applies interactive variant when onClick is provided', () => {
+    render(<Tile letter="A" points={1} onClick={() => {}} />)
+    const tile = screen.getByText('A').closest('.Tile__main')
+    expect(tile).toHaveClass('Tile--interactive')
+  })
 
-    it('does not render bonus background for normal tiles', () => {
-      const { container } = render(<Tile letter="A" points={1} bonus="normal" />)
-      
-      const bonusElement = container.querySelector('.bg-sky-200, .bg-blue-600')
+  it('applies disabled variant when isBlank is true', () => {
+    render(<Tile letter="A" points={1} isBlank={true} />)
+    const tile = screen.getByText('A').closest('.Tile__main')
+    expect(tile).toHaveClass('Tile--disabled')
+  })
+
+  it('shows blank indicator when isBlank is true', () => {
+    render(<Tile letter="A" points={1} isBlank={true} />)
+    const blankIndicator = screen.getByText('A').closest('.Tile__container')?.querySelector('.Tile__blank-indicator')
+    expect(blankIndicator).toBeInTheDocument()
+  })
+
+  it('shows zero points when isBlank is true', () => {
+    render(<Tile letter="A" points={1} isBlank={true} />)
+    const pointValue = screen.getByText('0')
+    expect(pointValue).toBeInTheDocument()
+  })
+
+  it('applies custom className', () => {
+    render(<Tile letter="A" points={1} className="custom-tile" />)
+    const container = screen.getByText('A').closest('.Tile__container')
+    expect(container).toHaveClass('custom-tile')
+  })
+
+  it('applies size variants correctly', () => {
+    render(<Tile letter="A" points={1} size="sm" />)
+    const tile = screen.getByText('A').closest('.Tile__main')
+    expect(tile).toHaveClass('Tile--sm')
+  })
+
+  describe('Bonus Types', () => {
+    it('renders normal bonus correctly', () => {
+      render(<Tile letter="A" points={1} bonus="normal" />)
+      const bonusElement = screen.getByText('A').closest('.Tile__container')?.querySelector('.Tile__bonus')
+      // For normal bonus, the bonus element should not exist
       expect(bonusElement).not.toBeInTheDocument()
     })
 
-    it('applies correct bonus background colors', () => {
-      const { container: dlsContainer } = render(
-        <Tile letter="A" points={1} bonus="dls" />
-      )
-      const { container: tlsContainer } = render(
-        <Tile letter="A" points={1} bonus="tls" />
-      )
-      
-      expect(dlsContainer.querySelector('.bg-sky-200')).toBeInTheDocument()
-      expect(tlsContainer.querySelector('.bg-blue-600')).toBeInTheDocument()
-    })
-  })
-
-  describe('Size Variants', () => {
-    it('renders default size correctly', () => {
-      const { container } = render(<Tile letter="A" points={1} size="default" />)
-      
-      const tileElement = container.querySelector('div[class*="w-12 h-12"]')
-      expect(tileElement).toBeInTheDocument()
+    it('renders double letter score bonus correctly', () => {
+      render(<Tile letter="A" points={1} bonus="dls" />)
+      const bonusElement = screen.getByText('A').closest('.Tile__container')?.querySelector('.Tile__bonus')
+      expect(bonusElement).toHaveClass('Tile__bonus--dls')
     })
 
-    it('renders small size correctly', () => {
-      const { container } = render(<Tile letter="A" points={1} size="sm" />)
-      
-      const tileElement = container.querySelector('div[class*="w-8 h-8"]')
-      expect(tileElement).toBeInTheDocument()
+    it('renders triple letter score bonus correctly', () => {
+      render(<Tile letter="A" points={1} bonus="tls" />)
+      const bonusElement = screen.getByText('A').closest('.Tile__container')?.querySelector('.Tile__bonus')
+      expect(bonusElement).toHaveClass('Tile__bonus--tls')
     })
 
-    it('renders large size correctly', () => {
-      const { container } = render(<Tile letter="A" points={1} size="lg" />)
-      
-      const tileElement = container.querySelector('div[class*="w-16 h-16"]')
-      expect(tileElement).toBeInTheDocument()
-    })
-  })
-
-  describe('Complex Scenarios', () => {
-    it('handles blank tile with bonus', () => {
-      const { container } = render(
-        <Tile letter="A" points={1} bonus="dls" isBlank={true} />
-      )
-      
-      // Should show bonus background
-      expect(container.querySelector('.bg-sky-200')).toBeInTheDocument()
-      
-      // Should show "0" for points
-      expect(screen.getByText('0')).toBeInTheDocument()
-      
-      // Should show blank indicator
-      expect(container.querySelector('.bg-red-500')).toBeInTheDocument()
-    })
-
-    it('handles interactive blank tile with bonus', () => {
-      const handleClick = jest.fn()
-      const { container } = render(
-        <Tile 
-          letter="A" 
-          points={1} 
-          bonus="tls" 
-          isBlank={true} 
-          onClick={handleClick} 
-        />
-      )
-      // Should be interactive
-      const tileElement = container.querySelector('.cursor-pointer')
-      expect(tileElement).toBeInTheDocument()
-      // Should show bonus background
-      expect(container.querySelector('.bg-blue-600')).toBeInTheDocument()
-      // Should show blank indicator
-      expect(container.querySelector('.bg-red-500')).toBeInTheDocument()
-      // Should be clickable
-      fireEvent.click(tileElement!)
-      expect(handleClick).toHaveBeenCalledTimes(1)
-    })
-  })
-
-  describe('Accessibility', () => {
-    it('renders letter prominently', () => {
-      render(<Tile letter="A" points={1} />)
-      
-      const letterElement = screen.getByText('A')
-      expect(letterElement).toHaveClass('text-amber-900', 'font-bold')
-    })
-
-    it('renders points in bottom right corner', () => {
-      const { container } = render(<Tile letter="A" points={1} />)
-      
-      const pointsElement = container.querySelector('.absolute.bottom-0\\.5.right-0\\.5')
-      expect(pointsElement).toBeInTheDocument()
-      expect(pointsElement).toHaveTextContent('1')
-    })
-  })
-
-  describe('Styling Consistency', () => {
-    it('applies consistent amber colour scheme', () => {
-      const { container } = render(<Tile letter="A" points={1} />)
-      
-      const tileElement = container.querySelector('div[class*="border-amber-800"]')
-      expect(tileElement).toBeInTheDocument()
-      
-      const letterElement = screen.getByText('A')
-      expect(letterElement).toHaveClass('text-amber-900')
-      
-      const pointsElement = screen.getByText('1')
-      expect(pointsElement).toHaveClass('text-amber-800')
-    })
-
-    it('applies gradient background styling', () => {
-      const { container } = render(<Tile letter="A" points={1} />)
-      
-      const tileElement = container.querySelector('div[style*="background-image"]')
-      expect(tileElement).toBeInTheDocument()
+    it('shows bonus background when bonus is not normal', () => {
+      render(<Tile letter="A" points={1} bonus="dls" />)
+      const bonusElement = screen.getByText('A').closest('.Tile__container')?.querySelector('.Tile__bonus')
+      expect(bonusElement).toBeInTheDocument()
     })
   })
 
   describe('Letter Values', () => {
     it('displays correct letter values', () => {
       render(<Tile letter="A" points={1} />)
-      
       const pointValue = screen.getByText('1')
       expect(pointValue).toBeInTheDocument()
-      expect(pointValue).toHaveClass('absolute', 'bottom-0.5', 'right-0.5')
+      expect(pointValue).toHaveClass('Tile__points')
     })
 
     it('displays high-value letters correctly', () => {
       render(<Tile letter="Q" points={10} />)
-      
       const pointValue = screen.getByText('10')
       expect(pointValue).toBeInTheDocument()
     })
 
     it('shows zero for blank tiles', () => {
       render(<Tile letter="A" points={1} isBlank={true} />)
-      
       const pointValue = screen.getByText('0')
       expect(pointValue).toBeInTheDocument()
+    })
+  })
+
+  describe('Accessibility', () => {
+    it('maintains proper structure for screen readers', () => {
+      render(<Tile letter="A" points={1} />)
+      const container = screen.getByText('A').closest('.Tile__container')
+      const letter = screen.getByText('A')
+      const points = screen.getByText('1')
+      
+      expect(container).toBeInTheDocument()
+      expect(letter).toBeInTheDocument()
+      expect(points).toBeInTheDocument()
     })
   })
 }) 

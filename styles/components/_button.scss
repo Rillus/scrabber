@@ -174,4 +174,13 @@
   .dark &[aria-invalid="true"] {
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--destructive) 40%, transparent);
   }
+
+  // Utility classes
+  &.Button--full {
+    width: 100%;
+  }
+
+  &.Button--flex {
+    flex: 1;
+  }
 }

@@ -40,4 +40,9 @@
       margin-right: var(--space-2);
     }
   }
+
+  // Size variants
+  &.Input--lg {
+    font-size: var(--text-lg);
+  }
 }

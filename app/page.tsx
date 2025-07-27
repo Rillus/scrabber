@@ -216,26 +216,26 @@ export default function ScrabbleScoreKeeper() {
 
   if (!gameStarted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 p-4">
-        <div className="max-w-md mx-auto pt-20">
+      <div className="Page">
+        <div className="Page__container">
           <Card>
-            <CardHeader className="text-center">
-              <CardTitle className="flex items-center justify-center gap-2 text-2xl">
-                <Trophy className="w-6 h-6 text-yellow-600" />
+            <CardHeader className="CardHeader--center">
+              <CardTitle className="Page__title">
+                <Trophy className="Page__icon Page__icon--trophy" />
                 Scrabber: score keeper for Scrabble
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium mb-2">Number of Players</label>
-                <div className="flex gap-2">
+            <CardContent className="Page__section">
+              <div className="Page__form-group">
+                <label className="Page__label">Number of Players</label>
+                <div className="Page__form-row">
                   {[1, 2, 3, 4].map((count) => (
                     <Button
                       key={count}
                       variant={playerCount === count ? "default" : "outline"}
                       size="sm"
                       onClick={() => setPlayerCount(count)}
-                      className="flex-1"
+                      className="Button--flex"
                     >
                       {count}
                     </Button>
@@ -243,8 +243,8 @@ export default function ScrabbleScoreKeeper() {
                 </div>
               </div>
 
-              <div className="space-y-3">
-                <label className="block text-sm font-medium">Player Names</label>
+              <div className="Page__form-group">
+                <label className="Page__label">Player Names</label>
                 {tempPlayerNames.slice(0, playerCount).map((name, index) => (
                   <Input
                     key={index}
@@ -259,8 +259,8 @@ export default function ScrabbleScoreKeeper() {
                 ))}
               </div>
 
-              <Button onClick={startGame} className="w-full" size="lg">
-                <Users className="w-4 h-4 mr-2" />
+              <Button onClick={startGame} className="Button--full" size="lg">
+                <Users className="Page__icon" />
                 Start Game
               </Button>
             </CardContent>
@@ -271,38 +271,38 @@ export default function ScrabbleScoreKeeper() {
   }
 
   const getWordBonusColor = (bonusText: string) => {
-    if (bonusText === "DWS") return "bg-orange-400 text-orange-900"
-    if (bonusText === "TWS") return "bg-red-500 text-white"
-    if (bonusText === "Bingo +50") return "bg-yellow-400 text-yellow-900"
-    return "bg-gray-200 text-gray-800"
+    if (bonusText === "DWS") return "dws"
+    if (bonusText === "TWS") return "tws"
+    if (bonusText === "Bingo +50") return "bingo"
+    return "default"
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 p-4">
-      <div className="max-w-4xl mx-auto space-y-6">
+    <div className="Page">
+      <div className="Page__container--wide">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Trophy className="w-6 h-6 text-yellow-600" />
+        <div className="Page__header">
+          <h1 className="Page__title">
+            <Trophy className="Page__icon Page__icon--trophy" />
             Scrabber: score keeper for Scrabble
           </h1>
           <Button onClick={newGame} variant="outline" size="sm">
-            <RotateCcw className="w-4 h-4 mr-2" />
+            <RotateCcw className="Page__icon" />
             New Game
           </Button>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-6">
+        <div className="Page__content--two-column">
           {/* Left Column - Score Entry */}
-          <div className="space-y-6">
+          <div className="Page__section">
             {/* Current Player */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Current Turn: {players[currentPlayerIndex]?.name}</CardTitle>
+                <CardTitle className="CardTitle--lg">Current Turn: {players[currentPlayerIndex]?.name}</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2">Word</label>
+              <CardContent className="Page__section">
+                <div className="Page__form-group">
+                  <label className="Page__label">Word</label>
                   <Input
                     ref={setWordInputRef}
                     value={word}
@@ -313,17 +313,17 @@ export default function ScrabbleScoreKeeper() {
                       }
                     }}
                     placeholder="Enter word..."
-                    className="text-lg"
+                    className="Input--lg"
                   />
                 </div>
 
                 {/* Letter Bonuses */}
                 {word && (
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Letter Bonuses</label>
-                    <div className="flex flex-wrap gap-3">
+                  <div className="Page__form-group">
+                    <label className="Page__label">Letter Bonuses</label>
+                    <div className="Page__input-group">
                       {letterStates.map((letterState, index) => (
-                        <div key={index} className="flex flex-col items-center gap-2">
+                        <div key={index} className="Page__tile-group">
                           <Tile
                             letter={letterState.letter}
                             points={LETTER_VALUES[letterState.letter] || 0}
@@ -331,7 +331,7 @@ export default function ScrabbleScoreKeeper() {
                             isBlank={letterState.isBlank}
                             onClick={() => toggleLetterBonus(index)}
                           />
-                          <div className="flex items-center gap-1">
+                          <div className="Page__checkbox-group">
                             <Checkbox
                               checked={letterState.isBlank}
                               onCheckedChange={(checked) => {
@@ -341,66 +341,66 @@ export default function ScrabbleScoreKeeper() {
                                   setLetterStates(newStates)
                                 }
                               }}
-                              className="w-3 h-3"
+                              className="Checkbox--sm"
                             />
-                            <span className="text-xs">Blank</span>
+                            <span className="Page__help-text">Blank</span>
                           </div>
                         </div>
                       ))}
                     </div>
-                    <p className="text-xs text-gray-600 mt-2">Click tiles to cycle: Normal → DLS → TLS</p>
+                    <p className="Page__help-text">Click tiles to cycle: Normal → DLS → TLS</p>
                   </div>
                 )}
 
                 {/* Word Multipliers */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="flex items-center space-x-2">
+                <div className="Page__form-row--equal">
+                  <div className="Page__checkbox-group">
                     <Checkbox 
                       checked={hasDoubleWord} 
                       onCheckedChange={(checked) => {
                         if (typeof checked === 'boolean') setHasDoubleWord(checked)
                       }} 
                     />
-                    <label className="text-sm font-medium flex items-center gap-2">
-                      <span className="w-4 h-4 bg-orange-400 border border-orange-500 rounded"></span>
+                    <label className="Page__label--inline">
+                      <span className="Page__bonus-indicator Page__bonus-indicator--dws"></span>
                       Double Word Score
                     </label>
                   </div>
-                  <div className="flex items-center space-x-2">
+                  <div className="Page__checkbox-group">
                     <Checkbox 
                       checked={hasTripleWord} 
                       onCheckedChange={(checked) => {
                         if (typeof checked === 'boolean') setHasTripleWord(checked)
                       }} 
                     />
-                    <label className="text-sm font-medium flex items-center gap-2">
-                      <span className="w-4 h-4 bg-red-500 border border-red-600 rounded"></span>
+                    <label className="Page__label--inline">
+                      <span className="Page__bonus-indicator Page__bonus-indicator--tws"></span>
                       Triple Word Score
                     </label>
                   </div>
                 </div>
 
                 {/* Bingo Bonus */}
-                <div className="flex items-center space-x-2">
+                <div className="Page__checkbox-group">
                   <Checkbox 
                     checked={hasBingo} 
                     onCheckedChange={(checked) => {
                       if (typeof checked === 'boolean') setHasBingo(checked)
                     }} 
                   />
-                  <label className="text-sm font-medium">7-Letter Bingo (+50 points)</label>
+                  <label className="Page__label--inline">7-Letter Bingo (+50 points)</label>
                 </div>
 
                 {/* Score Preview */}
                 {word && (
-                  <div className="bg-gray-50 p-3 rounded">
-                    <div className="text-sm text-gray-600">Calculated Score:</div>
-                    <div className="text-2xl font-bold text-green-600">{calculateScore()} points</div>
+                  <div className="Page__score-preview">
+                    <div className="Page__score-label">Calculated Score:</div>
+                    <div className="Page__score-value">{calculateScore()} points</div>
                   </div>
                 )}
 
-                <Button onClick={confirmTurn} disabled={!word.trim()} className="w-full" size="lg">
-                  <Plus className="w-4 h-4 mr-2" />
+                <Button onClick={confirmTurn} disabled={!word.trim()} className="Button--full" size="lg">
+                  <Plus className="Page__icon" />
                   Confirm Turn
                 </Button>
               </CardContent>
@@ -408,23 +408,23 @@ export default function ScrabbleScoreKeeper() {
           </div>
 
           {/* Right Column - Scores & History */}
-          <div className="space-y-6">
+          <div className="Page__section">
             {/* Current Scores */}
             <Card>
               <CardHeader>
                 <CardTitle>Current Scores</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
+                <div className="Page__section">
                   {players.map((player, index) => (
                     <div
                       key={index}
-                      className={`flex justify-between items-center p-3 rounded ${
-                        index === currentPlayerIndex ? "bg-blue-50 border border-blue-200" : "bg-gray-50"
+                      className={`Page__player-score ${
+                        index === currentPlayerIndex ? "Page__player-score--current" : ""
                       }`}
                     >
-                      <span className="font-medium">{player.name}</span>
-                      <span className="text-xl font-bold">{player.score}</span>
+                      <span className="Page__player-name">{player.name}</span>
+                      <span className="Page__player-points">{player.score}</span>
                     </div>
                   ))}
                 </div>
@@ -437,22 +437,22 @@ export default function ScrabbleScoreKeeper() {
                 <CardTitle>Turn History</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="max-h-96 overflow-y-auto space-y-3">
+                <div className="Page__history">
                   {turnHistory.length === 0 ? (
-                    <p className="text-gray-500 text-center py-4">No turns played yet</p>
+                    <p className="Page__empty-state">No turns played yet</p>
                   ) : (
                     turnHistory
                       .slice()
                       .reverse()
                       .map((turn, index) => (
-                        <div key={index} className="border rounded-lg p-4 bg-white">
-                          <div className="flex justify-between items-start mb-3">
-                            <div className="font-medium text-sm text-gray-600">{turn.player}</div>
-                            <div className="text-xl font-bold text-green-600">+{turn.score}</div>
+                        <div key={index} className="Page__history-item">
+                          <div className="Page__history-header">
+                            <div className="Page__history-player">{turn.player}</div>
+                            <div className="Page__history-score">+{turn.score}</div>
                           </div>
 
                           {/* Word displayed as tiles */}
-                          <div className="flex flex-wrap gap-1 mb-2">
+                          <div className="Page__history-word">
                             {turn.word.split("").map((letter, letterIndex) => {
                               // Determine if this letter had bonuses based on the bonuses array
                               const letterBonus = turn.bonuses.find((b) => b.startsWith(`${letter}(`))
@@ -472,7 +472,7 @@ export default function ScrabbleScoreKeeper() {
                                   points={LETTER_VALUES[letter.toUpperCase()] || 0}
                                   bonus={bonus}
                                   isBlank={isBlank}
-                                  className="scale-75"
+                                  className="Tile--sm"
                                 />
                               )
                             })}
@@ -480,13 +480,13 @@ export default function ScrabbleScoreKeeper() {
 
                           {/* Other bonuses */}
                           {turn.bonuses.length > 0 && (
-                            <div className="flex flex-wrap gap-1">
+                            <div className="Page__history-bonuses">
                               {turn.bonuses
                                 .filter((bonus) => !bonus.includes("(") || bonus.includes("Bingo"))
                                 .map((bonus, bonusIndex) => (
                                   <Badge
                                     key={bonusIndex}
-                                    className={`text-xs ${getWordBonusColor(bonus)}`}
+                                    className={`Badge--${getWordBonusColor(bonus)}`}
                                     variant="secondary"
                                   >
                                     {bonus}

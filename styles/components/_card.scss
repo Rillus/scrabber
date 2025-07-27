@@ -30,11 +30,19 @@
   &.border-b {
     padding-bottom: var(--space-6);
   }
+
+  &.CardHeader--center {
+    text-align: center;
+  }
 }
 
 .CardTitle {
   font-weight: var(--font-semibold);
   line-height: 1;
+
+  &.CardTitle--lg {
+    font-size: var(--text-lg);
+  }
 }
 
 .CardDescription {
