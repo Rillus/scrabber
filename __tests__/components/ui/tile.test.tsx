@@ -50,8 +50,8 @@ describe('Tile', () => {
 
   it('shows blank indicator when isBlank is true', () => {
     render(<Tile letter="A" points={1} isBlank={true} />)
-    const blankIndicator = screen.getByText('A').closest('.Tile__container')?.querySelector('.Tile__blank-indicator')
-    expect(blankIndicator).toBeInTheDocument()
+    const tile = screen.getByText('A').closest('.Tile__main')
+    expect(tile).toHaveClass('Tile--disabled')
   })
 
   it('shows zero points when isBlank is true', () => {

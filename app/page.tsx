@@ -66,8 +66,6 @@ export default function ScrabbleScoreKeeper() {
   const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0)
   const [word, setWord] = useState("")
   const [letterStates, setLetterStates] = useState<LetterState[]>([])
-  const [hasDoubleWord, setHasDoubleWord] = useState(false)
-  const [hasTripleWord, setHasTripleWord] = useState(false)
   const [hasBingo, setHasBingo] = useState(false)
   const [turnHistory, setTurnHistory] = useState<Turn[]>([])
   const [tempPlayerNames, setTempPlayerNames] = useState<string[]>(["Player 1", "Player 2"])
@@ -110,8 +108,6 @@ export default function ScrabbleScoreKeeper() {
     setCurrentPlayerIndex(0)
     setWord("")
     setLetterStates([])
-    setHasDoubleWord(false)
-    setHasTripleWord(false)
     setHasBingo(false)
     setTurnHistory([])
   }
@@ -124,11 +120,23 @@ export default function ScrabbleScoreKeeper() {
       newStates[index].bonus = "dls"
     } else if (currentBonus === "dls") {
       newStates[index].bonus = "tls"
+    } else if (currentBonus === "tls") {
+      newStates[index].bonus = "dws"
+    } else if (currentBonus === "dws") {
+      newStates[index].bonus = "tws"
     } else {
       newStates[index].bonus = "normal"
     }
 
     setLetterStates(newStates)
+  }
+
+  // Get the effective bonus for a tile
+  const getTileBonus = (index: number): BonusType => {
+    const letterState = letterStates[index]
+    if (!letterState) return "normal"
+    
+    return letterState.bonus
   }
 
 
@@ -137,6 +145,7 @@ export default function ScrabbleScoreKeeper() {
     if (!word) return 0
 
     let letterScore = 0
+    let wordMultiplier = 1
 
     // Calculate letter scores with bonuses
     letterStates.forEach(({ letter, bonus, isBlank }) => {
@@ -144,13 +153,14 @@ export default function ScrabbleScoreKeeper() {
 
       if (bonus === "dls") value *= 2
       if (bonus === "tls") value *= 3
+      if (bonus === "dws") wordMultiplier *= 2
+      if (bonus === "tws") wordMultiplier *= 3
 
       letterScore += value
     })
 
     // Apply word multipliers
-    if (hasDoubleWord) letterScore *= 2
-    if (hasTripleWord) letterScore *= 3
+    letterScore *= wordMultiplier
 
     // Add bingo bonus
     if (hasBingo) letterScore += 50
@@ -162,13 +172,13 @@ export default function ScrabbleScoreKeeper() {
     const bonuses = []
 
     letterStates.forEach(({ bonus, isBlank }, index) => {
-      if (bonus === "dls") bonuses.push(`${letterStates[index].letter}(DLS)`)
-      if (bonus === "tls") bonuses.push(`${letterStates[index].letter}(TLS)`)
-      if (isBlank) bonuses.push(`${letterStates[index].letter}(Blank)`)
+      if (bonus === "dls") bonuses.push(`${index}:DLS`)
+      if (bonus === "tls") bonuses.push(`${index}:TLS`)
+      if (bonus === "dws") bonuses.push(`${index}:DWS`)
+      if (bonus === "tws") bonuses.push(`${index}:TWS`)
+      if (isBlank) bonuses.push(`${index}:Blank`)
     })
 
-    if (hasDoubleWord) bonuses.push("DWS")
-    if (hasTripleWord) bonuses.push("TWS")
     if (hasBingo) bonuses.push("Bingo +50")
 
     return bonuses
@@ -199,8 +209,6 @@ export default function ScrabbleScoreKeeper() {
     // Reset turn state
     setWord("")
     setLetterStates([])
-    setHasDoubleWord(false)
-    setHasTripleWord(false)
     setHasBingo(false)
 
     // Move to next player
@@ -327,7 +335,7 @@ export default function ScrabbleScoreKeeper() {
                           <Tile
                             letter={letterState.letter}
                             points={LETTER_VALUES[letterState.letter] || 0}
-                            bonus={letterState.bonus}
+                            bonus={getTileBonus(index)}
                             isBlank={letterState.isBlank}
                             onClick={() => toggleLetterBonus(index)}
                           />
@@ -348,37 +356,11 @@ export default function ScrabbleScoreKeeper() {
                         </div>
                       ))}
                     </div>
-                    <p className="Page__help-text">Click tiles to cycle: Normal → DLS → TLS</p>
+                    <p className="Page__help-text">Click tiles to cycle: Normal → DLS → TLS → DWS → TWS</p>
                   </div>
                 )}
 
-                {/* Word Multipliers */}
-                <div className="Page__form-row--equal">
-                  <div className="Page__checkbox-group">
-                    <Checkbox 
-                      checked={hasDoubleWord} 
-                      onCheckedChange={(checked) => {
-                        if (typeof checked === 'boolean') setHasDoubleWord(checked)
-                      }} 
-                    />
-                    <label className="Page__label--inline">
-                      <span className="Page__bonus-indicator Page__bonus-indicator--dws"></span>
-                      Double Word Score
-                    </label>
-                  </div>
-                  <div className="Page__checkbox-group">
-                    <Checkbox 
-                      checked={hasTripleWord} 
-                      onCheckedChange={(checked) => {
-                        if (typeof checked === 'boolean') setHasTripleWord(checked)
-                      }} 
-                    />
-                    <label className="Page__label--inline">
-                      <span className="Page__bonus-indicator Page__bonus-indicator--tws"></span>
-                      Triple Word Score
-                    </label>
-                  </div>
-                </div>
+
 
                 {/* Bingo Bonus */}
                 <div className="Page__checkbox-group">
@@ -455,14 +437,16 @@ export default function ScrabbleScoreKeeper() {
                           <div className="Page__history-word">
                             {turn.word.split("").map((letter, letterIndex) => {
                               // Determine if this letter had bonuses based on the bonuses array
-                              const letterBonus = turn.bonuses.find((b) => b.startsWith(`${letter}(`))
+                              const letterBonus = turn.bonuses.find((b) => b.startsWith(`${letterIndex}:`))
                               let bonus: BonusType = "normal"
                               let isBlank = false
 
                               if (letterBonus) {
-                                if (letterBonus.includes("DLS")) bonus = "dls"
-                                else if (letterBonus.includes("TLS")) bonus = "tls"
-                                if (letterBonus.includes("Blank")) isBlank = true
+                                if (letterBonus.includes(":DLS")) bonus = "dls"
+                                else if (letterBonus.includes(":TLS")) bonus = "tls"
+                                else if (letterBonus.includes(":DWS")) bonus = "dws"
+                                else if (letterBonus.includes(":TWS")) bonus = "tws"
+                                if (letterBonus.includes(":Blank")) isBlank = true
                               }
 
                               return (
@@ -482,7 +466,7 @@ export default function ScrabbleScoreKeeper() {
                           {turn.bonuses.length > 0 && (
                             <div className="Page__history-bonuses">
                               {turn.bonuses
-                                .filter((bonus) => !bonus.includes("(") || bonus.includes("Bingo"))
+                                .filter((bonus) => !bonus.includes(":") || bonus.includes("Bingo"))
                                 .map((bonus, bonusIndex) => (
                                   <Badge
                                     key={bonusIndex}

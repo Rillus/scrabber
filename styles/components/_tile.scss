@@ -89,6 +89,14 @@
   &.Tile__bonus--tls {
     background-color: #2563eb; // blue-600
   }
+
+  &.Tile__bonus--dws {
+    background-color: #fb923c; // orange-400
+  }
+
+  &.Tile__bonus--tws {
+    background-color: #ef4444; // red-500
+  }
 }
 
 .Tile__letter {
@@ -99,6 +107,10 @@
   align-items: center;
   justify-content: center;
   height: 100%;
+
+  &.Tile__letter--blank {
+    color: rgba(#92400e, 0.5);
+  }
 }
 
 .Tile__points {
@@ -109,15 +121,8 @@
   font-weight: var(--font-semibold);
   color: #92400e; // amber-800
   line-height: 1;
-}
 
-.Tile__blank-indicator {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 0.5rem;
-  height: 0.5rem;
-  background-color: #ef4444; // red-500
-  border-radius: 50%;
-  transform: translate(-0.25rem, -0.25rem);
+  &.Tile__points--blank {
+    color: rgba(#92400e, 0.5);
+  }
 }

@@ -3,7 +3,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 
-export type BonusType = "normal" | "dls" | "tls"
+export type BonusType = "normal" | "dls" | "tls" | "dws" | "tws"
 
 const tileVariants = cva(
   "Tile",
@@ -51,6 +51,10 @@ function Tile({
         return "Tile__bonus--dls" // Light blue for Double Letter Score
       case "tls":
         return "Tile__bonus--tls" // Dark blue for Triple Letter Score
+      case "dws":
+        return "Tile__bonus--dws" // Orange for Double Word Score
+      case "tws":
+        return "Tile__bonus--tws" // Red for Triple Word Score
       default:
         return ""
     }
@@ -77,19 +81,14 @@ function Tile({
         )}
       >
         {/* Letter */}
-        <span className="Tile__letter">
+        <span className={`Tile__letter ${isBlank ? "Tile__letter--blank" : ""}`}>
           {letter}
         </span>
 
         {/* Point value in bottom right */}
-        <span className="Tile__points">
+        <span className={`Tile__points ${isBlank ? "Tile__points--blank" : ""}`}>
           {isBlank ? "0" : points}
         </span>
-
-        {/* Blank indicator */}
-        {isBlank && (
-          <div className="Tile__blank-indicator" />
-        )}
       </div>
     </div>
   )
