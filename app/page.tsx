@@ -491,13 +491,6 @@ export default function ScrabbleScoreKeeper() {
     )
   }
 
-  const getWordBonusColor = (bonusText: string) => {
-    if (bonusText === "DWS") return "dws"
-    if (bonusText === "TWS") return "tws"
-    if (bonusText === "Bingo +50") return "bingo"
-    return "default"
-  }
-
   const hasValidWords = currentWords.some(word => word.word.trim())
   const bingoAppliedPreview = hasBingo
   const totalScorePreview = hasValidWords ? calculateTotalScore() : 0
