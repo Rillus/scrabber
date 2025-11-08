@@ -54,7 +54,7 @@ This specification defines the implementation of multiple word scoring functiona
 ### FR1: Enhanced Turn Data Structure
 - Modify the `Turn` interface to support multiple words
 - Each word maintains its own letter states, bonuses, and calculated score
-- Preserve backward compatibility with existing single-word turns
+- No migration needed since data only exists during browser session
 
 ### FR2: Dynamic Word Entry UI
 - Add "+ Add Word" button to turn entry area
@@ -83,13 +83,13 @@ interface WordEntry {
   word: string
   letterStates: LetterState[]
   score: number
+  bonuses: string[]
 }
 
 interface Turn {
   player: string
-  words: WordEntry[]  // Changed from single word/score
+  words: WordEntry[]  // Array of words created in this turn
   totalScore: number
-  bonuses: string[]
   hasBingo: boolean
 }
 ```
@@ -98,7 +98,7 @@ interface Turn {
 - Create `MultiWordEntry` component
 - Create `WordEntryRow` component for individual words
 - Enhance `Turn` history display component
-- Maintain existing single-word compatibility
+- Single-word turns display as first word in array
 
 ### TR3: State Management
 - Extend current turn state to handle multiple words
@@ -155,23 +155,22 @@ Scenario: Viewing multiple word history
 
 Given the complexity and scope of this feature, it should be broken down into the following subtasks for iterative development:
 
-### Subtask 1: Data Model Foundation (Complexity: 2, Files: 2-3)
-**Deliverable:** Updated data structures and backward compatibility
+### Subtask 1: Data Model Foundation (Complexity: 1, Files: 1)
+**Deliverable:** Updated data structures for multiple words
 
 **Files Modified:**
-- `app/page.tsx` (interface definitions)
-- `components/ui/tile.tsx` (if type exports needed)
+- `app/page.tsx` (interface definitions and turn creation)
 
 **Tasks:**
 - Update `Turn` interface to support multiple words
 - Create `WordEntry` interface
-- Implement data migration logic for existing turn history
-- Add backward compatibility helpers
+- Update turn creation and display logic
+- No migration needed (session-only data)
 
 **Acceptance Criteria:**
-- Existing single-word turns continue to work
+- Single-word turns work as first word in array
 - New data structure supports multiple words
-- No breaking changes to current functionality
+- All existing functionality preserved
 
 ### Subtask 2: Core Multiple Word State Management (Complexity: 3, Files: 1)
 **Deliverable:** Backend logic for managing multiple words in turn state
@@ -217,16 +216,16 @@ Given the complexity and scope of this feature, it should be broken down into th
 - `app/page.tsx` (turn history display)
 
 **Tasks:**
-- Update turn history component
+- Update turn history component to show multiple words
 - Display multiple words in compact format
 - Show individual and total scores
-- Maintain existing styling
+- Maintain existing styling consistency
 
 **Acceptance Criteria:**
 - Multiple words display clearly in history
 - Total and individual scores visible
 - Compact format fits existing design
-- Backward compatibility with single-word turns
+- Single-word turns display as normal (first word in array)
 
 ### Subtask 5: Enhanced Testing & Polish (Complexity: 2, Files: 3-4)
 **Deliverable:** Comprehensive testing and UI polish
@@ -269,26 +268,26 @@ Given the complexity and scope of this feature, it should be broken down into th
 - Touch-friendly add/remove buttons
 - Maintain usability on small screens
 
-## Migration Strategy
+## Deployment Strategy
 
-### Phase 1: Foundation (Subtask 1)
-Deploy data structure changes with backward compatibility. Existing functionality unchanged.
+### Phase 1: Foundation (Subtask 1) ✅ Complete
+Data structure updated to support multiple words. Single-word functionality unchanged.
 
 ### Phase 2: Core Logic (Subtask 2)
-Deploy enhanced state management. Still single-word UI but multiple-word capable backend.
+Enhanced state management for multiple words. Single-word UI with multiple-word backend.
 
 ### Phase 3: UI Enhancement (Subtasks 3-4)
-Deploy multiple word entry interface and enhanced history display.
+Multiple word entry interface and enhanced history display.
 
 ### Phase 4: Polish (Subtask 5)
-Deploy testing improvements and final polish.
+Testing improvements and final polish.
 
 ## Risk Mitigation
 
 ### Technical Risks
-- **Data corruption**: Comprehensive testing of data migration
 - **Performance degradation**: Performance testing with large turn histories
 - **Mobile usability**: Extensive mobile device testing
+- **State complexity**: Careful state management for multiple words
 
 ### User Experience Risks
 - **Complexity**: Progressive disclosure with simple primary interface
@@ -311,3 +310,4 @@ Deploy testing improvements and final polish.
 - Test coverage > 90%
 - Zero critical bugs in first month
 - Mobile compatibility score > 95%
+- No session data corruption

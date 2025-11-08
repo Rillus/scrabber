@@ -191,6 +191,12 @@
   gap: var(--space-1);
 }
 
+.Page__history-skip {
+  font-size: var(--text-sm);
+  font-style: italic;
+  color: var(--muted-foreground);
+}
+
 .Page__empty-state {
   color: var(--muted-foreground);
   text-align: center;

@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Tile, type BonusType } from "@/components/ui/tile"
-import { Users, Trophy, RotateCcw, Plus } from "lucide-react"
+import { Users, Trophy, RotateCcw, Plus, SkipForward } from "lucide-react"
 
 // Scrabble letter values
 const LETTER_VALUES: Record<string, number> = {
@@ -47,11 +47,19 @@ interface LetterState {
   isBlank: boolean
 }
 
-interface Turn {
-  player: string
+interface WordEntry {
   word: string
+  letterStates: LetterState[]
   score: number
   bonuses: string[]
+}
+
+interface Turn {
+  player: string
+  words: WordEntry[]
+  totalScore: number
+  hasBingo: boolean
+  type: "play" | "skip"
 }
 
 interface Player {
@@ -59,17 +67,30 @@ interface Player {
   score: number
 }
 
+const MAX_ADDITIONAL_WORDS = 5
+
+const createEmptyWordEntry = (): WordEntry => ({
+  word: "",
+  letterStates: [],
+  score: 0,
+  bonuses: [],
+})
+
 export default function ScrabbleScoreKeeper() {
   const [gameStarted, setGameStarted] = useState(false)
   const [playerCount, setPlayerCount] = useState(2)
   const [players, setPlayers] = useState<Player[]>([])
   const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0)
-  const [word, setWord] = useState("")
-  const [letterStates, setLetterStates] = useState<LetterState[]>([])
+
+  // Multiple word state management
+  const [currentWords, setCurrentWords] = useState<WordEntry[]>([createEmptyWordEntry()])
   const [hasBingo, setHasBingo] = useState(false)
+
   const [turnHistory, setTurnHistory] = useState<Turn[]>([])
   const [tempPlayerNames, setTempPlayerNames] = useState<string[]>(["Player 1", "Player 2"])
   const [wordInputRef, setWordInputRef] = useState<HTMLInputElement | null>(null)
+  const [editingTurnIndex, setEditingTurnIndex] = useState<number | null>(null)
+  const [previousPlayerIndex, setPreviousPlayerIndex] = useState<number | null>(null)
 
   // Update tempPlayerNames when playerCount changes
   useEffect(() => {
@@ -77,22 +98,22 @@ export default function ScrabbleScoreKeeper() {
     setTempPlayerNames(newNames)
   }, [playerCount])
 
-  // Update letterStates when word changes
-  useEffect(() => {
-    const newStates = word.split('').map((letter) => ({
-      letter: letter.toUpperCase(),
-      bonus: 'normal' as BonusType,
-      isBlank: false,
-    }))
-    setLetterStates(newStates)
-  }, [word])
-
   // Focus word input when game starts or player changes
   useEffect(() => {
     if (gameStarted && wordInputRef) {
       wordInputRef.focus()
     }
   }, [gameStarted, currentPlayerIndex, wordInputRef])
+
+  const buildLetterStates = (word: string, previousStates: LetterState[] = []): LetterState[] =>
+    word.split('').map((letter, index) => {
+      const prevState = previousStates[index]
+      return {
+        letter: letter.toUpperCase(),
+        bonus: prevState?.bonus ?? ("normal" as BonusType),
+        isBlank: prevState?.isBlank ?? false,
+      }
+    })
 
   const startGame = () => {
     const newPlayers = tempPlayerNames.map((name) => ({ name, score: 0 }))
@@ -106,49 +127,137 @@ export default function ScrabbleScoreKeeper() {
     setGameStarted(false)
     setPlayers([])
     setCurrentPlayerIndex(0)
-    setWord("")
-    setLetterStates([])
+    setCurrentWords([createEmptyWordEntry()])
     setHasBingo(false)
     setTurnHistory([])
+    setEditingTurnIndex(null)
+    setPreviousPlayerIndex(null)
   }
 
-  const toggleLetterBonus = (index: number) => {
-    const newStates = [...letterStates]
-    const currentBonus = newStates[index].bonus
+  const toggleLetterBonus = (letterIndex: number, wordIndex: number = 0) => {
+    const wordEntry = currentWords[wordIndex]
+    if (!wordEntry || !wordEntry.letterStates[letterIndex]) return
+
+    const updatedWords = [...currentWords]
+    const newStates = [...updatedWords[wordIndex].letterStates]
+    const currentBonus = newStates[letterIndex].bonus
 
     if (currentBonus === "normal") {
-      newStates[index].bonus = "dls"
+      newStates[letterIndex].bonus = "dls"
     } else if (currentBonus === "dls") {
-      newStates[index].bonus = "tls"
+      newStates[letterIndex].bonus = "tls"
     } else if (currentBonus === "tls") {
-      newStates[index].bonus = "dws"
+      newStates[letterIndex].bonus = "dws"
     } else if (currentBonus === "dws") {
-      newStates[index].bonus = "tws"
+      newStates[letterIndex].bonus = "tws"
     } else {
-      newStates[index].bonus = "normal"
+      newStates[letterIndex].bonus = "normal"
     }
 
-    setLetterStates(newStates)
+    updatedWords[wordIndex] = {
+      ...updatedWords[wordIndex],
+      letterStates: newStates
+    }
+    setCurrentWords(updatedWords)
   }
 
   // Get the effective bonus for a tile
-  const getTileBonus = (index: number): BonusType => {
-    const letterState = letterStates[index]
+  const getTileBonus = (letterIndex: number, wordIndex: number = 0): BonusType => {
+    const letterState = currentWords[wordIndex]?.letterStates[letterIndex]
     if (!letterState) return "normal"
-    
+
     return letterState.bonus
+  }
+
+  const startEditingTurn = (turnIndex: number) => {
+    const turn = turnHistory[turnIndex]
+    if (!turn) return
+    if (turn.type !== "play") return
+
+    const playerIndex = players.findIndex((player) => player.name === turn.player)
+    setPreviousPlayerIndex(currentPlayerIndex)
+
+    if (playerIndex !== -1) {
+      setCurrentPlayerIndex(playerIndex)
+    }
+
+    const loadedWords = turn.words.length
+      ? turn.words.map((wordEntry) => ({
+          word: wordEntry.word,
+          letterStates: wordEntry.letterStates.map((state) => ({ ...state })),
+          score: wordEntry.score,
+          bonuses: [...wordEntry.bonuses],
+        }))
+      : [createEmptyWordEntry()]
+
+    setCurrentWords(loadedWords)
+    setHasBingo(turn.hasBingo)
+    setEditingTurnIndex(turnIndex)
+  }
+
+  const cancelEditingTurn = () => {
+    setEditingTurnIndex(null)
+    setHasBingo(false)
+    setCurrentWords([createEmptyWordEntry()])
+    if (previousPlayerIndex !== null) {
+      setCurrentPlayerIndex(previousPlayerIndex)
+      setPreviousPlayerIndex(null)
+    }
+  }
+
+  const addWord = () => {
+    if (currentWords.length >= MAX_ADDITIONAL_WORDS) return
+    setCurrentWords([...currentWords, createEmptyWordEntry()])
+  }
+
+  const removeWord = (wordIndex: number) => {
+    if (wordIndex === 0 || currentWords.length <= 1) return
+    const updatedWords = currentWords.filter((_, index) => index !== wordIndex)
+    setCurrentWords(updatedWords)
+  }
+
+  const updateWord = (wordIndex: number, word: string) => {
+    const updatedWords = [...currentWords]
+    const upperWord = word.toUpperCase()
+    const newLetterStates = buildLetterStates(upperWord, updatedWords[wordIndex]?.letterStates)
+
+    updatedWords[wordIndex] = {
+      ...updatedWords[wordIndex],
+      word: upperWord,
+      letterStates: newLetterStates
+    }
+    setCurrentWords(updatedWords)
+  }
+
+  const toggleBlankTile = (letterIndex: number, wordIndex: number = 0) => {
+    const updatedWords = [...currentWords]
+    const letterState = updatedWords[wordIndex]?.letterStates[letterIndex]
+    if (!letterState) return
+
+    const newStates = [...updatedWords[wordIndex].letterStates]
+
+    newStates[letterIndex] = {
+      ...newStates[letterIndex],
+      isBlank: !newStates[letterIndex].isBlank
+    }
+
+    updatedWords[wordIndex] = {
+      ...updatedWords[wordIndex],
+      letterStates: newStates
+    }
+    setCurrentWords(updatedWords)
   }
 
 
 
-  const calculateScore = () => {
-    if (!word) return 0
+  const calculateWordScore = (wordEntry: WordEntry): number => {
+    if (!wordEntry.word) return 0
 
     let letterScore = 0
     let wordMultiplier = 1
 
     // Calculate letter scores with bonuses
-    letterStates.forEach(({ letter, bonus, isBlank }) => {
+    wordEntry.letterStates.forEach(({ letter, bonus, isBlank }) => {
       let value = isBlank ? 0 : LETTER_VALUES[letter.toUpperCase()] || 0
 
       if (bonus === "dls") value *= 2
@@ -162,16 +271,41 @@ export default function ScrabbleScoreKeeper() {
     // Apply word multipliers
     letterScore *= wordMultiplier
 
-    // Add bingo bonus
-    if (hasBingo) letterScore += 50
-
     return letterScore
   }
 
-  const getBonusesText = () => {
-    const bonuses = []
+  const calculateTotalScore = (): number => {
+    let totalScore = 0
 
-    letterStates.forEach(({ bonus, isBlank }, index) => {
+    // Calculate score for each word
+    currentWords.forEach(wordEntry => {
+      if (wordEntry.word.trim()) {
+        totalScore += calculateWordScore(wordEntry)
+      }
+    })
+
+    // Add bingo bonus only when explicitly selected
+    if (hasBingo) {
+      totalScore += 50
+    }
+
+    return totalScore
+  }
+
+  // Update individual word scores in real-time (for Phase 3)
+  // const updateWordScores = () => {
+  //   const updatedWords = currentWords.map(wordEntry => ({
+  //     ...wordEntry,
+  //     score: calculateWordScore(wordEntry),
+  //     bonuses: getWordBonusesText(wordEntry)
+  //   }))
+  //   setCurrentWords(updatedWords)
+  // }
+
+  const getWordBonusesText = (wordEntry: WordEntry): string[] => {
+    const bonuses: string[] = []
+
+    wordEntry.letterStates.forEach(({ bonus, isBlank }, index) => {
       if (bonus === "dls") bonuses.push(`${index}:DLS`)
       if (bonus === "tls") bonuses.push(`${index}:TLS`)
       if (bonus === "dws") bonuses.push(`${index}:DWS`)
@@ -179,42 +313,121 @@ export default function ScrabbleScoreKeeper() {
       if (isBlank) bonuses.push(`${index}:Blank`)
     })
 
-    if (hasBingo) bonuses.push("Bingo +50")
-
     return bonuses
   }
 
+  const createTurn = (player: string): Turn => {
+    // Update word scores and bonuses before creating turn
+    const finalWords = currentWords
+      .filter(word => word.word.trim() !== "") // Only include non-empty words
+      .map(wordEntry => ({
+        ...wordEntry,
+        score: calculateWordScore(wordEntry),
+        bonuses: getWordBonusesText(wordEntry)
+      }))
 
+    const bingoApplied = hasBingo
+    const totalScore = finalWords.reduce((sum, word) => sum + word.score, 0) + (bingoApplied ? 50 : 0)
+
+    return {
+      player,
+      words: finalWords,
+      totalScore,
+      hasBingo: bingoApplied,
+      type: "play"
+    }
+  }
 
   const confirmTurn = () => {
-    if (!word.trim()) return
+    // Check if at least one word has content
+    const hasValidWords = currentWords.some(word => word.word.trim() !== "")
+    if (!hasValidWords) return
 
-    const score = calculateScore()
-    const bonuses = getBonusesText()
+    if (editingTurnIndex !== null) {
+      const existingTurn = turnHistory[editingTurnIndex]
+      if (!existingTurn) return
+
+      const updatedTurn = createTurn(existingTurn.player)
+      const playerIndex = players.findIndex((player) => player.name === existingTurn.player)
+      const scoreDifference = updatedTurn.totalScore - existingTurn.totalScore
+
+      const updatedPlayers = [...players]
+      if (playerIndex !== -1) {
+        updatedPlayers[playerIndex] = {
+          ...updatedPlayers[playerIndex],
+          score: updatedPlayers[playerIndex].score + scoreDifference,
+        }
+      }
+
+      const updatedHistory = [...turnHistory]
+      updatedHistory[editingTurnIndex] = updatedTurn
+
+      setPlayers(updatedPlayers)
+      setTurnHistory(updatedHistory)
+      setCurrentWords([createEmptyWordEntry()])
+      setHasBingo(false)
+      setEditingTurnIndex(null)
+
+      if (previousPlayerIndex !== null) {
+        setCurrentPlayerIndex(previousPlayerIndex)
+        setPreviousPlayerIndex(null)
+      }
+
+      setTimeout(() => {
+        if (wordInputRef) {
+          wordInputRef.focus()
+        }
+      }, 100)
+
+      return
+    }
+
+    // Create the turn with multiple words
+    const newTurn = createTurn(players[currentPlayerIndex].name)
 
     // Update player score
     const newPlayers = [...players]
-    newPlayers[currentPlayerIndex].score += score
+    newPlayers[currentPlayerIndex].score += newTurn.totalScore
     setPlayers(newPlayers)
 
     // Add to turn history
-    const newTurn: Turn = {
-      player: players[currentPlayerIndex].name,
-      word: word.toUpperCase(),
-      score,
-      bonuses,
-    }
     setTurnHistory([...turnHistory, newTurn])
 
     // Reset turn state
-    setWord("")
-    setLetterStates([])
+    setCurrentWords([createEmptyWordEntry()])
     setHasBingo(false)
 
     // Move to next player
     setCurrentPlayerIndex((currentPlayerIndex + 1) % players.length)
 
     // Refocus the input after a short delay to ensure state updates
+    setTimeout(() => {
+      if (wordInputRef) {
+        wordInputRef.focus()
+      }
+    }, 100)
+  }
+
+  const skipCurrentTurn = () => {
+    if (editingTurnIndex !== null) return
+    if (players.length === 0) return
+
+    const playerName = players[currentPlayerIndex]?.name
+    if (!playerName) return
+
+    const skipTurn: Turn = {
+      player: playerName,
+      words: [],
+      totalScore: 0,
+      hasBingo: false,
+      type: "skip",
+    }
+
+    setTurnHistory([...turnHistory, skipTurn])
+    setCurrentWords([createEmptyWordEntry()])
+    setHasBingo(false)
+    setCurrentPlayerIndex((currentPlayerIndex + 1) % players.length)
+
     setTimeout(() => {
       if (wordInputRef) {
         wordInputRef.focus()
@@ -285,6 +498,11 @@ export default function ScrabbleScoreKeeper() {
     return "default"
   }
 
+  const hasValidWords = currentWords.some(word => word.word.trim())
+  const bingoAppliedPreview = hasBingo
+  const totalScorePreview = hasValidWords ? calculateTotalScore() : 0
+  const isEditingTurn = editingTurnIndex !== null
+
   return (
     <div className="Page">
       <div className="Page__container--wide">
@@ -308,59 +526,102 @@ export default function ScrabbleScoreKeeper() {
               <CardHeader>
                 <CardTitle className="CardTitle--lg">Current Turn: {players[currentPlayerIndex]?.name}</CardTitle>
               </CardHeader>
-              <CardContent className="Page__section">
-                <div className="Page__form-group">
-                  <label className="Page__label">Word</label>
+              <CardContent className="Page__section Page__word-list">
+                {currentWords.map((wordEntry, wordIndex) => {
+                  const wordScore = wordEntry.word.trim() ? calculateWordScore(wordEntry) : 0
+                  return (
+                    <div
+                      key={`word-entry-${wordIndex}`}
+                      className="Page__word-entry"
+                      data-testid={`word-entry-${wordIndex}`}
+                    >
+                      <div className="Page__word-entry-header">
+                        <label className="Page__label">Word {wordIndex + 1}</label>
+                        {wordIndex > 0 && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeWord(wordIndex)}
+                            aria-label={`Remove Word ${wordIndex + 1}`}
+                          >
+                            Remove Word {wordIndex + 1}
+                          </Button>
+                        )}
+                      </div>
+
+                      <div className="Page__form-group">
                   <Input
-                    ref={setWordInputRef}
-                    value={word}
-                    onChange={(e) => setWord(e.target.value)}
+                          ref={wordIndex === 0 ? setWordInputRef : undefined}
+                          value={wordEntry.word}
+                          onChange={(e) => updateWord(wordIndex, e.target.value)}
                     onKeyDown={(e) => {
-                      if (e.key === 'Enter' && word.trim()) {
+                            if (e.key === 'Enter' && currentWords.some(word => word.word.trim())) {
                         confirmTurn()
                       }
                     }}
                     placeholder="Enter word..."
-                    className="Input--lg"
+                          className="Input--lg"
                   />
                 </div>
 
-                {/* Letter Bonuses */}
-                {word && (
-                  <div className="Page__form-group">
-                    <label className="Page__label">Letter Bonuses</label>
-                    <div className="Page__input-group">
-                      {letterStates.map((letterState, index) => (
-                        <div key={index} className="Page__tile-group">
+                      {wordEntry.word && (
+                        <>
+                          <div className="Page__form-group">
+                            <label className="Page__label Page__label--subtle">Letter Bonuses</label>
+                            <div className="Page__input-group">
+                              {wordEntry.letterStates.map((letterState, letterIndex) => (
+                                <div key={letterIndex} className="Page__tile-group">
                           <Tile
                             letter={letterState.letter}
                             points={LETTER_VALUES[letterState.letter] || 0}
-                            bonus={getTileBonus(index)}
+                                    bonus={getTileBonus(letterIndex, wordIndex)}
                             isBlank={letterState.isBlank}
-                            onClick={() => toggleLetterBonus(index)}
+                                    onClick={() => toggleLetterBonus(letterIndex, wordIndex)}
                           />
-                          <div className="Page__checkbox-group">
+                                  <div className="Page__checkbox-group">
                             <Checkbox
                               checked={letterState.isBlank}
                               onCheckedChange={(checked) => {
                                 if (typeof checked === 'boolean') {
-                                  const newStates = [...letterStates]
-                                  newStates[index].isBlank = checked
-                                  setLetterStates(newStates)
+                                          toggleBlankTile(letterIndex, wordIndex)
                                 }
                               }}
-                              className="Checkbox--sm"
+                                      className="Checkbox--sm"
                             />
-                            <span className="Page__help-text">Blank</span>
+                                    <span className="Page__help-text">Blank</span>
                           </div>
                         </div>
                       ))}
                     </div>
-                    <p className="Page__help-text">Click tiles to cycle: Normal → DLS → TLS → DWS → TWS</p>
+                            <p className="Page__help-text">Click tiles to cycle: Normal → DLS → TLS → DWS → TWS</p>
                   </div>
-                )}
 
+                          <div className="Page__word-score">Word Score: {wordScore} points</div>
+                        </>
+                      )}
+                  </div>
+                  )
+                })}
 
+                <div className="Page__word-actions">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={addWord}
+                    disabled={currentWords.length >= MAX_ADDITIONAL_WORDS}
+                  >
+                    Add Word
+                  </Button>
+                  {isEditingTurn && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={cancelEditingTurn}
+                    >
+                      Cancel Edit
+                    </Button>
+                  )}
+                </div>
 
                 {/* Bingo Bonus */}
                 <div className="Page__checkbox-group">
@@ -374,16 +635,48 @@ export default function ScrabbleScoreKeeper() {
                 </div>
 
                 {/* Score Preview */}
-                {word && (
+                {hasValidWords && (
                   <div className="Page__score-preview">
-                    <div className="Page__score-label">Calculated Score:</div>
-                    <div className="Page__score-value">{calculateScore()} points</div>
+                    <div className="Page__score-label">Total Turn Score:</div>
+                    <div className="Page__score-value">{totalScorePreview} points</div>
+                    <ul className="Page__score-breakdown">
+                      {currentWords
+                        .map((wordEntry, wordIndex) => ({
+                          word: wordEntry.word.trim(),
+                          index: wordIndex,
+                          score: wordEntry.word.trim() ? calculateWordScore(wordEntry) : 0,
+                        }))
+                        .filter(({ word }) => word)
+                        .map(({ word, index, score }) => (
+                          <li key={`score-breakdown-${index}`}>
+                            Word {index + 1}: {word} ({score} pts)
+                          </li>
+                        ))}
+                      {bingoAppliedPreview && (
+                        <li>Bingo bonus: +50 pts</li>
+                      )}
+                    </ul>
                   </div>
                 )}
 
-                <Button onClick={confirmTurn} disabled={!word.trim()} className="Button--full" size="lg">
+                <Button
+                  onClick={confirmTurn}
+                  disabled={!hasValidWords}
+                  className="Button--full"
+                  size="lg"
+                >
                   <Plus className="Page__icon" />
-                  Confirm Turn
+                  {isEditingTurn ? "Update Turn" : "Confirm Turn"}
+                </Button>
+                <Button
+                  onClick={skipCurrentTurn}
+                  variant="outline"
+                  className="Button--full"
+                  size="lg"
+                  disabled={isEditingTurn}
+                >
+                  <SkipForward className="Page__icon" />
+                  Skip Turn
                 </Button>
               </CardContent>
             </Card>
@@ -426,27 +719,57 @@ export default function ScrabbleScoreKeeper() {
                     turnHistory
                       .slice()
                       .reverse()
-                      .map((turn, index) => (
-                        <div key={index} className="Page__history-item">
-                          <div className="Page__history-header">
-                            <div className="Page__history-player">{turn.player}</div>
-                            <div className="Page__history-score">+{turn.score}</div>
+                          .map((turn, index) => {
+                            const bingoApplied = turn.hasBingo
+                            const actualIndex = turnHistory.length - 1 - index
+                            if (turn.type === "skip") {
+                              return (
+                                <div key={index} className="Page__history-item">
+                                  <div className="Page__history-header">
+                                    <div className="Page__history-player">{turn.player}</div>
+                                    <div className="Page__history-score">+0</div>
+                                  </div>
+                                  <div className="Page__history-skip">Skipped turn (tile exchange)</div>
+                                </div>
+                              )
+                            }
+                            return (
+                              <div key={index} className="Page__history-item">
+                                <div className="Page__history-header">
+                                  <div className="Page__history-player">{turn.player}</div>
+                                  <div className="Page__history-score">+{turn.totalScore}</div>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => startEditingTurn(actualIndex)}
+                                    aria-label={`Edit turn for ${turn.player}`}
+                                  >
+                                    Edit Turn
+                                  </Button>
                           </div>
 
-                          {/* Word displayed as tiles */}
-                          <div className="Page__history-word">
-                            {turn.word.split("").map((letter, letterIndex) => {
-                              // Determine if this letter had bonuses based on the bonuses array
-                              const letterBonus = turn.bonuses.find((b) => b.startsWith(`${letterIndex}:`))
+                                {turn.words.map((wordEntry, wordIndex) => (
+                                  <div key={`history-word-${wordIndex}`} className="Page__history-word-group">
+                                    <div className="Page__history-word-header">
+                                      <span className="Page__history-word-title">
+                                        Word {wordIndex + 1}: {wordEntry.word}
+                                      </span>
+                                      <span className="Page__history-word-score">{wordEntry.score} pts</span>
+                                    </div>
+                                    <div className="Page__history-word">
+                                      {wordEntry.word.split("").map((letter, letterIndex) => {
+                                        const letterBonus = wordEntry.bonuses.find((b) =>
+                                          b.startsWith(`${letterIndex}:`)
+                                        )
                               let bonus: BonusType = "normal"
                               let isBlank = false
 
                               if (letterBonus) {
-                                if (letterBonus.includes(":DLS")) bonus = "dls"
-                                else if (letterBonus.includes(":TLS")) bonus = "tls"
-                                else if (letterBonus.includes(":DWS")) bonus = "dws"
-                                else if (letterBonus.includes(":TWS")) bonus = "tws"
-                                if (letterBonus.includes(":Blank")) isBlank = true
+                                          if (letterBonus.includes(":DLS")) bonus = "dls"
+                                          else if (letterBonus.includes(":TLS")) bonus = "tls"
+                                          else if (letterBonus.includes(":DWS")) bonus = "dws"
+                                          else if (letterBonus.includes(":TWS")) bonus = "tws"
+                                          if (letterBonus.includes(":Blank")) isBlank = true
                               }
 
                               return (
@@ -456,30 +779,24 @@ export default function ScrabbleScoreKeeper() {
                                   points={LETTER_VALUES[letter.toUpperCase()] || 0}
                                   bonus={bonus}
                                   isBlank={isBlank}
-                                  className="Tile--sm"
+                                            className="Tile--sm"
                                 />
                               )
                             })}
                           </div>
-
-                          {/* Other bonuses */}
-                          {turn.bonuses.length > 0 && (
-                            <div className="Page__history-bonuses">
-                              {turn.bonuses
-                                .filter((bonus) => !bonus.includes(":") || bonus.includes("Bingo"))
-                                .map((bonus, bonusIndex) => (
-                                  <Badge
-                                    key={bonusIndex}
-                                    className={`Badge--${getWordBonusColor(bonus)}`}
-                                    variant="secondary"
-                                  >
-                                    {bonus}
-                                  </Badge>
+                                  </div>
                                 ))}
+
+                                {bingoApplied && (
+                                  <div className="Page__history-bonuses">
+                                    <Badge className="Badge--bingo" variant="secondary">
+                                      Bingo +50
+                                    </Badge>
                             </div>
                           )}
                         </div>
-                      ))
+                            )
+                          })
                   )}
                 </div>
               </CardContent>
