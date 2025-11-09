@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -68,6 +68,7 @@ interface Player {
 }
 
 const MAX_ADDITIONAL_WORDS = 5
+const STORAGE_KEY = "scrabber-game-state-v1"
 
 const createEmptyWordEntry = (): WordEntry => ({
   word: "",
@@ -75,6 +76,16 @@ const createEmptyWordEntry = (): WordEntry => ({
   score: 0,
   bonuses: [],
 })
+
+interface PersistedGameState {
+  gameStarted: boolean
+  playerCount: number
+  players: Player[]
+  currentPlayerIndex: number
+  currentWords: WordEntry[]
+  hasBingo: boolean
+  turnHistory: Turn[]
+}
 
 export default function ScrabbleScoreKeeper() {
   const [gameStarted, setGameStarted] = useState(false)
@@ -91,11 +102,14 @@ export default function ScrabbleScoreKeeper() {
   const [wordInputRef, setWordInputRef] = useState<HTMLInputElement | null>(null)
   const [editingTurnIndex, setEditingTurnIndex] = useState<number | null>(null)
   const [previousPlayerIndex, setPreviousPlayerIndex] = useState<number | null>(null)
+  const isRestoringRef = useRef(false)
 
   // Update tempPlayerNames when playerCount changes
   useEffect(() => {
-    const newNames = Array.from({ length: playerCount }, (_, i) => `Player ${i + 1}`)
-    setTempPlayerNames(newNames)
+    if (isRestoringRef.current) return
+    setTempPlayerNames((prev) =>
+      Array.from({ length: playerCount }, (_, i) => prev[i] ?? `Player ${i + 1}`)
+    )
   }, [playerCount])
 
   // Focus word input when game starts or player changes
@@ -104,6 +118,86 @@ export default function ScrabbleScoreKeeper() {
       wordInputRef.focus()
     }
   }, [gameStarted, currentPlayerIndex, wordInputRef])
+
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    const storedState = window.localStorage.getItem(STORAGE_KEY)
+    if (!storedState) return
+
+    try {
+      const parsed: Partial<PersistedGameState> = JSON.parse(storedState)
+      if (!parsed || !parsed.players) return
+
+      isRestoringRef.current = true
+
+      const restoredPlayers = parsed.players ?? []
+      const restoredPlayerCount =
+        parsed.playerCount ?? (restoredPlayers.length > 0 ? restoredPlayers.length : 2)
+      const restoredCurrentWords =
+        parsed.currentWords && parsed.currentWords.length > 0
+          ? parsed.currentWords
+          : [createEmptyWordEntry()]
+      const restoredTurnHistory = (parsed.turnHistory ?? []).map((turn) => ({
+        ...turn,
+        type: turn?.type ?? "play",
+      }))
+
+      setPlayers(restoredPlayers)
+      setPlayerCount(restoredPlayerCount)
+      setTempPlayerNames(
+        restoredPlayers.length > 0
+          ? restoredPlayers.map((player) => player.name)
+          : Array.from({ length: restoredPlayerCount }, (_, i) => `Player ${i + 1}`)
+      )
+      setCurrentPlayerIndex(
+        Math.min(
+          Math.max(parsed.currentPlayerIndex ?? 0, 0),
+          Math.max(restoredPlayers.length - 1, 0)
+        )
+      )
+      setCurrentWords(restoredCurrentWords)
+      setHasBingo(parsed.hasBingo ?? false)
+      setTurnHistory(restoredTurnHistory)
+
+      if (parsed.gameStarted) {
+        setGameStarted(true)
+      }
+    } catch {
+      // Ignore malformed saved state
+    } finally {
+      isRestoringRef.current = false
+    }
+  }, [])
+
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    if (isRestoringRef.current) return
+
+    if (!gameStarted || players.length === 0) {
+      window.localStorage.removeItem(STORAGE_KEY)
+      return
+    }
+
+    const stateToSave: PersistedGameState = {
+      gameStarted,
+      playerCount,
+      players,
+      currentPlayerIndex,
+      currentWords,
+      hasBingo,
+      turnHistory,
+    }
+
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave))
+  }, [
+    gameStarted,
+    playerCount,
+    players,
+    currentPlayerIndex,
+    currentWords,
+    hasBingo,
+    turnHistory,
+  ])
 
   const buildLetterStates = (word: string, previousStates: LetterState[] = []): LetterState[] =>
     word.split('').map((letter, index) => {
@@ -132,6 +226,9 @@ export default function ScrabbleScoreKeeper() {
     setTurnHistory([])
     setEditingTurnIndex(null)
     setPreviousPlayerIndex(null)
+    if (typeof window !== "undefined") {
+      window.localStorage.removeItem(STORAGE_KEY)
+    }
   }
 
   const toggleLetterBonus = (letterIndex: number, wordIndex: number = 0) => {

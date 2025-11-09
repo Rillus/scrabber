@@ -1,7 +1,9 @@
 import React from 'react'
-import { render, screen, fireEvent, within } from '@testing-library/react'
+import { render, screen, within, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import ScrabbleScoreKeeper from '@/app/page'
+
+const STORAGE_KEY = 'scrabber-game-state-v1'
 
 // Mock the Next.js router
 jest.mock('next/navigation', () => ({
@@ -24,8 +26,11 @@ jest.mock('next/navigation', () => ({
 }))
 
 describe('Scrabber: score keeper for Scrabble', () => {
+  let renderResult: ReturnType<typeof render>
+
   beforeEach(() => {
-    render(<ScrabbleScoreKeeper />)
+    window.localStorage.clear()
+    renderResult = render(<ScrabbleScoreKeeper />)
   })
 
   describe('Game Setup', () => {
@@ -482,6 +487,105 @@ describe('Scrabber: score keeper for Scrabble', () => {
 
       expect(screen.getByRole('button', { name: /confirm turn/i })).toBeInTheDocument()
       expect(screen.getByText('+5')).toBeInTheDocument()
+    })
+  })
+
+  describe('Persistence', () => {
+    it('saves game state to localStorage after a played turn', async () => {
+      const user = userEvent.setup()
+      const startButtons = screen.getAllByText('Start Game')
+      await user.click(startButtons[0])
+
+      const wordInput = screen.getByPlaceholderText('Enter word...')
+      await user.type(wordInput, 'DOG')
+      await user.click(screen.getByText('Confirm Turn'))
+
+      await waitFor(() => {
+        const stored = window.localStorage.getItem(STORAGE_KEY)
+        expect(stored).not.toBeNull()
+        const parsed = JSON.parse(stored as string)
+        expect(parsed.turnHistory).toHaveLength(1)
+        expect(parsed.turnHistory[0].words[0].word).toBe('DOG')
+        expect(parsed.players[0].score).toBe(5)
+      })
+    })
+
+    it('restores game state from localStorage on load', async () => {
+      renderResult.unmount()
+
+      const savedState = {
+        gameStarted: true,
+        playerCount: 2,
+        players: [
+          { name: 'Alice', score: 18 },
+          { name: 'Bob', score: 12 },
+        ],
+        currentPlayerIndex: 1,
+        currentWords: [
+          {
+            word: '',
+            letterStates: [],
+            score: 0,
+            bonuses: [],
+          },
+        ],
+        hasBingo: false,
+        turnHistory: [
+          {
+            player: 'Alice',
+            words: [
+              {
+                word: 'HELLO',
+                letterStates: [
+                  { letter: 'H', bonus: 'normal', isBlank: false },
+                  { letter: 'E', bonus: 'normal', isBlank: false },
+                  { letter: 'L', bonus: 'normal', isBlank: false },
+                  { letter: 'L', bonus: 'normal', isBlank: false },
+                  { letter: 'O', bonus: 'normal', isBlank: false },
+                ],
+                score: 8,
+                bonuses: [],
+              },
+            ],
+            totalScore: 8,
+            hasBingo: false,
+            type: 'play',
+          },
+        ],
+      }
+
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(savedState))
+      renderResult = render(<ScrabbleScoreKeeper />)
+
+      await waitFor(() =>
+        expect(screen.getByText('Current Turn: Bob')).toBeInTheDocument()
+      )
+      expect(screen.getByText('Alice', { selector: '.Page__player-name' })).toBeInTheDocument()
+      expect(screen.getByText('18')).toBeInTheDocument()
+      expect(screen.getByText('Bob', { selector: '.Page__player-name' })).toBeInTheDocument()
+      expect(screen.getByText('12')).toBeInTheDocument()
+      expect(screen.getByText('Word 1: HELLO')).toBeInTheDocument()
+      expect(screen.getByText('+8')).toBeInTheDocument()
+    })
+
+    it('clears saved game state when starting a new game', async () => {
+      const user = userEvent.setup()
+      const startButtons = screen.getAllByText('Start Game')
+      await user.click(startButtons[0])
+
+      const wordInput = screen.getByPlaceholderText('Enter word...')
+      await user.type(wordInput, 'DOG')
+      await user.click(screen.getByText('Confirm Turn'))
+
+      await waitFor(() => {
+        expect(window.localStorage.getItem(STORAGE_KEY)).not.toBeNull()
+      })
+
+      await user.click(screen.getByText('New Game'))
+
+      await waitFor(() => {
+        expect(window.localStorage.getItem(STORAGE_KEY)).toBeNull()
+      })
     })
   })
 
